@@ -1,2 +1,2 @@
 # Requirements
-'''pip install pandas streamlit'''
+```pip install pandas streamlit```
