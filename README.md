@@ -18,7 +18,7 @@
 | Tungsten concentration               | float64 | 75    | 75    | 0          |                                                        |
 | Oxygen concentration                 | float64 | 1256  | 1256  | 0          |                                                        |
 | Titanium concentration               | float64 | 935   | 935   | 0          |                                                        |
-| Nitrogen concentration               | float64 | 1242  | 1183  | 59         | 59 : "\d+tot(\d+\|nd)res" -> 67tot33res                 |
+| Nitrogen concentration               | float64 | 1242  | 1183  | 59         | 59 : "\d+tot(\d+\|nd)res" -> 67tot33res                |
 | Aluminium concentration              | float64 | 905   | 905   | 0          |                                                        |
 | Boron concentration                  | float64 | 504   | 504   | 0          |                                                        |
 | Niobium concentration                | float64 | 752   | 752   | 0          |                                                        |
