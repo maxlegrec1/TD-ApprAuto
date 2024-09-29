@@ -13,22 +13,24 @@ def create_folds(output_dir, db_path, n_folds):
     df = pd.read_csv(db_path, sep="\s+", header=None)
 
     def preprocess(df):
-        # drop the Weld ID Collumn
-        df = df.drop(43, axis=1)
-
-        # Onehot encode the collumn 27
-        onehot = OneHotEncoder(sparse=False, handle_unknown="ignore")
-        onehot_encoded = onehot.fit_transform(df[[27]])
-        onehot_columns = [f"27_{cat}" for cat in onehot.categories_[0]]
-        onehot_df = pd.DataFrame(onehot_encoded, columns=onehot_columns, index=df.index)
-        df = df.drop(27, axis=1)
-        df = pd.concat([df, onehot_df], axis=1)
 
         # convert all collumn names to strings
         df.columns = df.columns.astype(str)
 
+        # drop the Weld ID Collumn
+        df = df.drop("43", axis=1)
+
+        # Onehot encode the collumn 27
+        onehot = OneHotEncoder(sparse=False, handle_unknown="ignore")
+        onehot_encoded = onehot.fit_transform(df[["27"]])
+        onehot_columns = [f"27_{cat}" for cat in onehot.categories_[0]]
+        onehot_df = pd.DataFrame(onehot_encoded, columns=onehot_columns, index=df.index)
+        df = df.drop("27", axis=1)
+        df = pd.concat([df, onehot_df], axis=1)
+
         df.loc[df["24"] != "N", "23"] = df["23"].replace("N", "DC")
 
+        # Onehot encode the collumn 23
         onehot = OneHotEncoder(sparse=False, handle_unknown="ignore")
         onehot_encoded = onehot.fit_transform(df[["23"]])
         onehot_columns = [f"23_{cat}" for cat in onehot.categories_[0]]
@@ -36,6 +38,7 @@ def create_folds(output_dir, db_path, n_folds):
         df = df.drop("23", axis=1)
         df = pd.concat([df, onehot_df], axis=1)
 
+        # Onehot encode the collumn 24
         onehot = OneHotEncoder(sparse=False, handle_unknown="ignore")
         onehot_encoded = onehot.fit_transform(df[["24"]])
         onehot_columns = [f"24_{cat}" for cat in onehot.categories_[0]]
@@ -43,8 +46,7 @@ def create_folds(output_dir, db_path, n_folds):
         df = df.drop("24", axis=1)
         df = pd.concat([df, onehot_df], axis=1)
 
-        print(df)
-        # Identify columns to be imputed
+        # Identify columns to fill the Ns (everything except Y)
         columns_to_impute = [col for col in df.columns if col not in ["30", "31"]]
         columns_stay = ["30", "31"]
 
