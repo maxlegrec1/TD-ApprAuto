@@ -2,17 +2,22 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 from data import get_data
 
-# import utils
+import utils
 
-# (X_train, y_train), (X_test, y_test) = utils.load_dataset(fold=1)
+(X_train, y_train), (X_test, y_test) = utils.load_dataset(fold=1)
 
 
-# X_train, y_train = utils.keep_known_Y(X_train, y_train)
-# X_test, y_test = utils.keep_known_Y(X_test, y_test)
-# Y_train, y_test = y_train["31"], y_test["31"]
+X_train, y_train = utils.keep_known_Y(X_train, y_train)
+X_test, y_test = utils.keep_known_Y(X_test, y_test)
+# y_train, y_test = y_train["31"], y_test["31"]
 
-X_train, X_test, y_train, y_test = get_data(["Yield strength", "Ultimate tensile strength"], test_size=0.2, drop_y_nan_values=True)
+print("With utils:")
+print(f"{X_train.shape=}, {y_train.shape=}")
 
+# X_train, X_test, y_train, y_test = get_data(["Yield strength", "Ultimate tensile strength"], test_size=0.2, drop_y_nan_values=True, nan_values='Median')
+
+print("With get_data:")
+print(f"{X_train.shape=}, {y_train.shape=}")
 
 def train_linear_regression(X_train, X_test, y_train, y_test):
     # Initialize the linear regression model

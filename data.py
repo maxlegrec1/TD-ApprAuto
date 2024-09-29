@@ -19,7 +19,7 @@ def get_data(
     columns: List[str] = COLUMNS[:-1],
     filename: str = 'welddb/welddb.data',
     drop_y_nan_values: bool = False,
-    nan_values: Literal['Gaussian', 'Mean', 'Zero', 'Remove'] = 'Gaussian',
+    nan_values: Literal['Gaussian', 'Mean', 'Median', 'Zero', 'Remove'] = 'Gaussian',
     test_size: None | float = None,
     random_state: int = 42
 ) -> Tuple[pd.DataFrame, pd.DataFrame] | Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -58,7 +58,7 @@ def get_data(
     return X_train, X_test, y_train, y_test
 
 
-def replace_nan(data_train: pd.DataFrame, data_test: pd.DataFrame | None = None, method: Literal['Gaussian', 'Mean', 'Zero', 'Remove'] = 'Gaussian') -> Tuple[pd.DataFrame, pd.DataFrame] | pd.DataFrame:
+def replace_nan(data_train: pd.DataFrame, data_test: pd.DataFrame | None = None, method: Literal['Gaussian', 'Mean', 'Median', 'Zero', 'Remove'] = 'Gaussian') -> Tuple[pd.DataFrame, pd.DataFrame] | pd.DataFrame:
     """The mean and std are calculated only with the training data."""
     if method == 'Remove':
         data_train = data_train.dropna()
@@ -77,6 +77,9 @@ def replace_nan(data_train: pd.DataFrame, data_test: pd.DataFrame | None = None,
         elif method == 'Mean':
             mean = data_train[column].mean()
             func = lambda: mean
+        elif method == 'Median':
+            median = data_train[column].median()
+            func = lambda: median
 
         data_train[column] = data_train[column].apply(lambda x: func() if pd.isna(x) else x)
         if data_test is not None:
