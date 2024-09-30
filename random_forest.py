@@ -5,7 +5,7 @@ from data import get_data
 from sklearn.metrics import r2_score
 
 
-target_features = ['Voltage', 'Current', 'Heat input', 'Interpass temperature', 'Yield strength', 'Ultimate tensile strength']
+target_features = ['Yield strength', 'Ultimate tensile strength']
 
 X_train, X_test, y_train, y_test = get_data(target_features, test_size=0.2, drop_y_nan_values=True)
 
