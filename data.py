@@ -113,7 +113,7 @@ def get_mean_std(data: pd.DataFrame, column: str) -> Tuple[float, float]:
 
 def one_hot_encode(data: pd.DataFrame, column: str, prefix: str = None) -> pd.DataFrame:
     encoded_columns = pd.get_dummies(data[column], prefix=prefix)
-    data = data.drop(column, axis=1)
+    data.drop(column, axis=1, inplace=True)
     return pd.concat([data, encoded_columns], axis=1)
 
 
