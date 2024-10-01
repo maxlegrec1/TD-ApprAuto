@@ -1,7 +1,8 @@
-from typing import List, Tuple, Literal
+from typing import List, Tuple, Literal, Generator
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold
 
 
 COLUMNS = ['Carbon concentration', 'Silicon concentration', 'Manganese concentration', 'Sulphur concentration','Phosphorus concentration', 'Nickel concentration', 'Chromium concentration', 'Molybdenum concentration', 'Vanadium concentration', 'Copper concentration', 'Cobalt concentration', 'Tungsten concentration', 'Oxygen concentration', 'Titanium concentration', 'Nitrogen concentration', 'Aluminium concentration', 'Boron concentration', 'Niobium concentration', 'Tin concentration', 'Arsenic concentration', 'Antimony concentration', 'Current', 'Voltage', 'AC or DC', 'Electrode positive or negative', 'Heat input', 'Interpass temperature', 'Type of weld', 'Post weld heat treatment temperature', 'Post weld heat treatment time', 'Yield strength', 'Ultimate tensile strength', 'Elongation', 'Reduction of Area', 'Charpy temperature', 'Charpy impact toughness', 'Hardness', r'50 % FATT', 'Primary ferrite in microstructure', 'Ferrite with second phase', 'Acicular ferrite', 'Martensite', 'Ferrite with carbide aggreagate', 'Weld ID']
@@ -22,9 +23,9 @@ def get_data(
     features: List[str] = FEATURES,
     filename: str = 'welddb/welddb.data',
     drop_y_nan_values: bool = False,
-    nan_values: Literal['Gaussian', 'Mean', 'Median', 'Zero', 'Remove'] = 'Gaussian',
+    nan_values: Literal['Gaussian', 'Mean', 'Median', 'Zero', 'Remove', None] = None,
     test_size: None | float = None,
-    random_state: int = 42
+    random_state: int = 42,
 ) -> Tuple[pd.DataFrame, pd.DataFrame] | Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """If test_size is None, returns X, y.\n
     Otherwise, returns X_train, X_test, y_train, y_test."""
@@ -62,8 +63,25 @@ def get_data(
     return X_train, X_test, y_train, y_test
 
 
-def replace_nan(data_train: pd.DataFrame, data_test: pd.DataFrame | None = None, method: Literal['Gaussian', 'Mean', 'Median', 'Zero', 'Remove'] = 'Gaussian') -> Tuple[pd.DataFrame, pd.DataFrame] | pd.DataFrame:
+def get_cross_validation_data(
+    X: pd.DataFrame,
+    y: pd.DataFrame,
+    n_folds: int = 5,
+    random_state: int = 42
+) -> Generator[Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame], None, None]:
+    """Returns a generator of X_train, X_val, y_train, y_val."""
+    
+    kf = KFold(n_splits=n_folds, shuffle=True, random_state=random_state)
+    
+    for train_index, val_index in kf.split(X):
+        yield X.iloc[train_index], X.iloc[val_index], y.iloc[train_index], y.iloc[val_index]
+
+
+def replace_nan(data_train: pd.DataFrame, data_test: pd.DataFrame | None = None, method: Literal['Gaussian', 'Mean', 'Median', 'Zero', 'Remove', None] = None) -> Tuple[pd.DataFrame, pd.DataFrame] | pd.DataFrame:
     """The mean and std are calculated only with the training data."""
+    if method is None:
+        return data_train if data_test is None else data_train, data_test
+    
     if method == 'Remove':
         data_train = data_train.dropna()
         if data_test is None:
@@ -121,7 +139,7 @@ def remove_anomalies(data: pd.DataFrame) -> pd.DataFrame:
     for column in data.columns:
         data[column] = data[column].replace(r'<(\d+)', r'\1', regex=True) # Replace <99 by 99
     if 'Nitrogen concentration' in data.columns:
-        data['Nitrogen concentration'] = data['Nitrogen concentration'].replace(r'\d+tot(\d+|nd)res', 'N', regex=True) # Replace 99tot99res by N
+        data['Nitrogen concentration'] = data['Nitrogen concentration'].replace(r'(\d+)tot(\d+|nd)res', r'\1', regex=True) # Replace 99tot99res by N
     if 'Electrode positive or negative' in data.columns:
         data['Electrode positive or negative'] = data['Electrode positive or negative'].replace(r'\d+', 'N', regex=True) # Replace 0 by N
     if 'Interpass temperature' in data.columns:
