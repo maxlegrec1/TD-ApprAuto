@@ -169,7 +169,12 @@ def get_data(
     Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame],
 ]:
     """If test_size is None, returns X, y.\n
-    Otherwise, returns X_train, X_test, y_train, y_test."""
+    Otherwise, returns X_train, X_test, y_train, y_test.
+    
+    @param target_features: The target features to predict. 
+    @param features: The features to use.
+    @n_pca: The number of components to use in PCA. If None, PCA is not used.
+    """
     if isinstance(target_features, str):
         target_features = [target_features]
 
