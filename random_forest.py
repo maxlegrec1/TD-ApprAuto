@@ -1,13 +1,22 @@
 from sklearn.ensemble import RandomForestRegressor
+
 from data import get_data
-from train import train, print_scores
+from train import print_scores, train
 
+target_features = ["Yield strength", "Ultimate tensile strength"]
 
-target_features = ['Yield strength', 'Ultimate tensile strength']
+X_train, X_test, y_train, y_test = get_data(
+    target_features, test_size=0.2, drop_y_nan_values=True, nan_values="Median"
+)
 
-X_train, X_test, y_train, y_test = get_data(target_features, test_size=0.2, drop_y_nan_values=True)
-
-model = train(RandomForestRegressor, X_train, y_train, n_estimators=100, random_state=42, print_results=True)
+model = train(
+    RandomForestRegressor,
+    X_train,
+    y_train,
+    n_estimators=100,
+    random_state=42,
+    print_results=True,
+)
 print_scores(model, X_train, X_test, y_train, y_test)
 
 # feature_importances = model.feature_importances_
