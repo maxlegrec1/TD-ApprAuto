@@ -1,7 +1,6 @@
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 
-import utils
 from data import get_data
 from train import print_scores, train
 
@@ -20,15 +19,6 @@ def train_linear_regression(X_train, X_test, y_train, y_test):
 
     return model, train_mse, test_mse, train_r2, test_r2
 
-
-(X_train, y_train), (X_test, y_test) = utils.load_dataset(fold=1)
-
-X_train, y_train = utils.keep_known_Y(X_train, y_train)
-X_test, y_test = utils.keep_known_Y(X_test, y_test)
-# y_train, y_test = y_train["31"], y_test["31"]
-
-print("With utils:")
-print(f"{X_train.shape=}, {y_train.shape=}")
 
 X_train, X_test, y_train, y_test = get_data(
     target_features=["Yield strength", "Ultimate tensile strength"],
