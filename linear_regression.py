@@ -1,9 +1,8 @@
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
-from data import get_data
-from train import train, print_scores
 
-import utils
+from data import get_data
+from train import print_scores, train
 
 
 def train_linear_regression(X_train, X_test, y_train, y_test):
@@ -21,39 +20,14 @@ def train_linear_regression(X_train, X_test, y_train, y_test):
     return model, train_mse, test_mse, train_r2, test_r2
 
 
-(X_train, y_train), (X_test, y_test) = utils.load_dataset(fold=1)
-
-X_train, y_train = utils.keep_known_Y(X_train, y_train)
-X_test, y_test = utils.keep_known_Y(X_test, y_test)
-# y_train, y_test = y_train["31"], y_test["31"]
-
-print("With utils:")
-print(f"{X_train.shape=}, {y_train.shape=}")
-
 X_train, X_test, y_train, y_test = get_data(
-    target_features = ["Yield strength", "Ultimate tensile strength"],
-    test_size = 0.2,
-    drop_y_nan_values = True,
-    nan_values = 'Median',
+    target_features=["Yield strength", "Ultimate tensile strength"],
+    test_size=0.2,
+    drop_y_nan_values=True,
+    nan_values='Median',
     random_state=1,
     n_pca=41,
 )
 
 model = train(LinearRegression, X_train, y_train, print_results=True)
 print_scores(model, X_train, X_test, y_train, y_test)
-
-# model, train_mse, test_mse, train_r2, test_r2 = train_linear_regression(
-#     X_train, X_test, y_train, y_test
-# )
-
-# print("\nLinear Regression Results:")
-# print(f"Training MSE: {train_mse:.4f}")
-# print(f"Test MSE: {test_mse:.4f}")
-# print(f"Training R2 Score: {train_r2:.4f}")
-# print(f"Test R2 Score: {test_r2:.4f}")
-
-# If you want to see the coefficients and intercept of the model
-# print("\nModel Coefficients:")
-# for feature, coef in zip(X_train.columns, model.coef_):
-#     print(f"{feature}: {coef:.4f}")
-# print(f"Intercept: {model.intercept_[0]:.4f}")
