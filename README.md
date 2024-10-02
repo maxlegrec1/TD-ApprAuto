@@ -1,5 +1,5 @@
 # Requirements
-```pip install pandas streamlit```
+```pip install pandas numpy torch sklearn```
 
 # Columns :
 | Name                                 | Type    | Not N | Valid | To convert | Comment                                                |
