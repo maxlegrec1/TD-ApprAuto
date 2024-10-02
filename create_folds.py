@@ -7,6 +7,53 @@ from sklearn.impute import SimpleImputer
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import OneHotEncoder
 
+COLUMNS = [
+    "Carbon concentration",
+    "Silicon concentration",
+    "Manganese concentration",
+    "Sulphur concentration",
+    "Phosphorus concentration",
+    "Nickel concentration",
+    "Chromium concentration",
+    "Molybdenum concentration",
+    "Vanadium concentration",
+    "Copper concentration",
+    "Cobalt concentration",
+    "Tungsten concentration",
+    "Oxygen concentration",
+    "Titanium concentration",
+    "Nitrogen concentration",
+    "Aluminium concentration",
+    "Boron concentration",
+    "Niobium concentration",
+    "Tin concentration",
+    "Arsenic concentration",
+    "Antimony concentration",
+    "Current",
+    "Voltage",
+    "AC or DC",
+    "Electrode positive or negative",
+    "Heat input",
+    "Interpass temperature",
+    "Type of weld",
+    "Post weld heat treatment temperature",
+    "Post weld heat treatment time",
+    "Yield strength",
+    "Ultimate tensile strength",
+    "Elongation",
+    "Reduction of Area",
+    "Charpy temperature",
+    "Charpy impact toughness",
+    "Hardness",
+    r"50 % FATT",
+    "Primary ferrite in microstructure",
+    "Ferrite with second phase",
+    "Acicular ferrite",
+    "Martensite",
+    "Ferrite with carbide aggreagate",
+    "Weld ID",
+]
+
 
 def create_folds(output_dir, db_path, n_folds):
     # Read the space-separated file
@@ -14,53 +61,98 @@ def create_folds(output_dir, db_path, n_folds):
 
     def preprocess(df):
 
+        TO_KEEP = [
+            "Carbon concentration",
+            "Silicon concentration",
+            "Manganese concentration",
+            "Sulphur concentration",
+            "Phosphorus concentration",
+            "Nickel concentration",
+            "Chromium concentration",
+            "Molybdenum concentration",
+            "Vanadium concentration",
+            "Copper concentration",
+            "Cobalt concentration",
+            "Tungsten concentration",
+            "Oxygen concentration",
+            "Titanium concentration",
+            "Nitrogen concentration",
+            "Aluminium concentration",
+            "Boron concentration",
+            "Niobium concentration",
+            "Tin concentration",
+            "Arsenic concentration",
+            "Antimony concentration",
+            "Current",
+            "Voltage",
+            "Heat input",
+            "Interpass temperature",
+            "Post weld heat treatment temperature",
+            "Post weld heat treatment time",
+            "Yield strength",
+            "Ultimate tensile strength",
+        ]
         # convert all collumn names to strings
-        df.columns = df.columns.astype(str)
+        # df.columns = df.columns.astype(str)
+        column_mapping = {i: COLUMNS[i] for i in range(len(COLUMNS))}
+        # print(column_mapping)
+        df = df.rename(columns=column_mapping)
+        print(df)
+        # drop the Weld ID Column
+        df = df.drop("Weld ID", axis=1)
 
-        # drop the Weld ID Collumn
-        df = df.drop("43", axis=1)
-
-        # Onehot encode the collumn 27
+        # Onehot encode the column 27
         onehot = OneHotEncoder(sparse=False, handle_unknown="ignore")
-        onehot_encoded = onehot.fit_transform(df[["27"]])
-        onehot_columns = [f"27_{cat}" for cat in onehot.categories_[0]]
+        onehot_encoded = onehot.fit_transform(df[["Type of weld"]])
+        onehot_columns = [f"Type of weld_{cat}" for cat in onehot.categories_[0]]
+        TO_KEEP += onehot_columns
         onehot_df = pd.DataFrame(onehot_encoded, columns=onehot_columns, index=df.index)
-        df = df.drop("27", axis=1)
+        df = df.drop("Type of weld", axis=1)
         df = pd.concat([df, onehot_df], axis=1)
 
-        df.loc[df["24"] != "N", "23"] = df["23"].replace("N", "DC")
+        df.loc[df["Electrode positive or negative"] != "N", "AC or DC"] = df[
+            "AC or DC"
+        ].replace("N", "DC")
 
         # Onehot encode the collumn 23
         onehot = OneHotEncoder(sparse=False, handle_unknown="ignore")
-        onehot_encoded = onehot.fit_transform(df[["23"]])
-        onehot_columns = [f"23_{cat}" for cat in onehot.categories_[0]]
+        onehot_encoded = onehot.fit_transform(df[["AC or DC"]])
+        onehot_columns = [f"AC or DC_{cat}" for cat in onehot.categories_[0]]
+        TO_KEEP += onehot_columns
         onehot_df = pd.DataFrame(onehot_encoded, columns=onehot_columns, index=df.index)
-        df = df.drop("23", axis=1)
+        df = df.drop("AC or DC", axis=1)
         df = pd.concat([df, onehot_df], axis=1)
 
         # Onehot encode the collumn 24
         onehot = OneHotEncoder(sparse=False, handle_unknown="ignore")
-        onehot_encoded = onehot.fit_transform(df[["24"]])
-        onehot_columns = [f"24_{cat}" for cat in onehot.categories_[0]]
+        onehot_encoded = onehot.fit_transform(df[["Electrode positive or negative"]])
+        onehot_columns = [
+            f"Electrode positive or negative_{cat}" for cat in onehot.categories_[0]
+        ]
+        TO_KEEP += onehot_columns
         onehot_df = pd.DataFrame(onehot_encoded, columns=onehot_columns, index=df.index)
-        df = df.drop("24", axis=1)
+        df = df.drop("Electrode positive or negative", axis=1)
         df = pd.concat([df, onehot_df], axis=1)
 
         # Identify columns to fill the Ns (everything except Y)
-        columns_to_impute = [col for col in df.columns if col not in ["30", "31"]]
-        columns_stay = ["30", "31"]
+        columns_to_impute = [
+            col
+            for col in df.columns
+            if col not in ["Yield strength", "Ultimate tensile strength"]
+        ]
+        columns_remain = ["Yield strength", "Ultimate tensile strength"]
 
         # Replace 'N' with NaN for numeric conversion
         df[columns_to_impute] = df[columns_to_impute].replace("N", np.nan)
-        df[columns_stay] = df[columns_stay].replace("N", -1)
+        df[columns_remain] = df[columns_remain].replace("N", -1)
 
         # Convert columns to numeric
         for col in columns_to_impute:
             df[col] = pd.to_numeric(df[col], errors="coerce")
-        # Create an imputer
-
         df = df.fillna(df.median())
-        df[columns_stay] = df[columns_stay].replace(-1, "N")
+        df[columns_remain] = df[columns_remain].replace(-1, "N")
+
+        df = df[TO_KEEP]
         return df
 
     df = preprocess(df)

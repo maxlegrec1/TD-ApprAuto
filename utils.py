@@ -11,11 +11,11 @@ def load_dataset(fold=1):
 
     # Yield strength / MPa is collumn 30 and Ultimate tensile strength / MPa is collumn 31
 
-    X_train = pd.concat([train_ds.iloc[:, :27], train_ds.iloc[:, 29:]], axis=1)
-    Y_train = train_ds.iloc[:, 27:29]
+    X_train = train_ds.drop(columns=["Yield strength", "Ultimate tensile strength"])
+    Y_train = train_ds[["Yield strength", "Ultimate tensile strength"]]
 
-    X_test = pd.concat([test_ds.iloc[:, :27], test_ds.iloc[:, 29:]], axis=1)
-    Y_test = test_ds.iloc[:, 27:29]
+    X_test = test_ds.drop(columns=["Yield strength", "Ultimate tensile strength"])
+    Y_test = test_ds[["Yield strength", "Ultimate tensile strength"]]
 
     return (X_train, Y_train), (X_test, Y_test)
 
