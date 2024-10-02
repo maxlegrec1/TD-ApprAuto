@@ -35,7 +35,8 @@ X_train, X_test, y_train, y_test = get_data(
     test_size = 0.2,
     drop_y_nan_values = True,
     nan_values = 'Median',
-    random_state=1
+    random_state=1,
+    n_pca=41,
 )
 
 model = train(LinearRegression, X_train, y_train, print_results=True)

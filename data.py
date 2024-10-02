@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
+from pca import pca
 
 
 COLUMNS = ['Carbon concentration', 'Silicon concentration', 'Manganese concentration', 'Sulphur concentration','Phosphorus concentration', 'Nickel concentration', 'Chromium concentration', 'Molybdenum concentration', 'Vanadium concentration', 'Copper concentration', 'Cobalt concentration', 'Tungsten concentration', 'Oxygen concentration', 'Titanium concentration', 'Nitrogen concentration', 'Aluminium concentration', 'Boron concentration', 'Niobium concentration', 'Tin concentration', 'Arsenic concentration', 'Antimony concentration', 'Current', 'Voltage', 'AC or DC', 'Electrode positive or negative', 'Heat input', 'Interpass temperature', 'Type of weld', 'Post weld heat treatment temperature', 'Post weld heat treatment time', 'Yield strength', 'Ultimate tensile strength', 'Elongation', 'Reduction of Area', 'Charpy temperature', 'Charpy impact toughness', 'Hardness', r'50 % FATT', 'Primary ferrite in microstructure', 'Ferrite with second phase', 'Acicular ferrite', 'Martensite', 'Ferrite with carbide aggreagate', 'Weld ID']
@@ -26,6 +27,8 @@ def get_data(
     nan_values: Literal['Gaussian', 'Mean', 'Median', 'Zero', 'Remove', None] = None,
     test_size: None | float = None,
     random_state: int = 42,
+    n_pca: int | None = None,
+    one_hot_encode: bool = True,
 ) -> Tuple[pd.DataFrame, pd.DataFrame] | Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """If test_size is None, returns X, y.\n
     Otherwise, returns X_train, X_test, y_train, y_test."""
@@ -42,8 +45,10 @@ def get_data(
     remove_anomalies(data)
     data.replace('N', pd.NA, inplace=True)
     
-    data = one_hot_encode_all(data, columns)
-    data = convert_to_float(data, columns)
+    if one_hot_encode:
+        data = one_hot_encode_all(data, columns)
+    
+    data = convert_to_float(data, columns, errors='ignore' if one_hot_encode else 'raise')
     
     if drop_y_nan_values:
         data.dropna(subset=target_features, inplace=True)
@@ -52,12 +57,12 @@ def get_data(
     y = data[target_features]               # Target
     
     if test_size is None:
-        X: pd.DataFrame = replace_nan(X, method=nan_values)
+        X: pd.DataFrame = pca(replace_nan(X, method=nan_values), n_components=n_pca)
         y: pd.DataFrame = replace_nan(y, method=nan_values)
         return X, y
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
-    X_train, X_test = replace_nan(X_train, X_test, method=nan_values)
+    X_train, X_test = pca(*replace_nan(X_train, X_test, method=nan_values), n_components=n_pca)
     y_train, y_test = replace_nan(y_train, y_test, method=nan_values)
 
     return X_train, X_test, y_train, y_test
@@ -155,9 +160,9 @@ def one_hot_encode_all(data: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
     return data
 
 
-def convert_to_float(data: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
+def convert_to_float(data: pd.DataFrame, columns: List[str], errors: Literal['raise', 'coerce', 'ignore'] = 'raise') -> pd.DataFrame:
     for column in set(COLUMNS_FLOAT).intersection(columns):
-        data[column] = pd.to_numeric(data[column])
+        data[column] = pd.to_numeric(data[column], errors=errors)
     return data
 
 

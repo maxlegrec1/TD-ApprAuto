@@ -5,7 +5,7 @@ from train import train, print_scores
 
 target_features = ['Yield strength', 'Ultimate tensile strength']
 
-X_train, X_test, y_train, y_test = get_data(target_features, test_size=0.2, drop_y_nan_values=True)
+X_train, X_test, y_train, y_test = get_data(target_features, test_size=0.2, drop_y_nan_values=True, nan_values='Median', n_pca=None)
 
 model = train(RandomForestRegressor, X_train, y_train, n_estimators=100, random_state=42, print_results=True)
 print_scores(model, X_train, X_test, y_train, y_test)
