@@ -58,6 +58,7 @@ COLUMNS_STRING = [
     "Type of weld",
     "Weld ID",
 ]
+
 COLUMNS_FLOAT = [
     "Carbon concentration",
     "Silicon concentration",
@@ -116,6 +117,7 @@ TARGET_FEATURES = [
     "Martensite",
     "Ferrite with carbide aggreagate",
 ]
+
 FEATURES = [
     "Carbon concentration",
     "Silicon concentration",
@@ -147,6 +149,18 @@ FEATURES = [
     "Type of weld",
     "Post weld heat treatment temperature",
     "Post weld heat treatment time",
+]
+
+IMPURITIES = [
+    "Sulphur concentration",
+    "Phosphorus concentration",
+    "Oxygen concentration",
+    "Nitrogen concentration",
+    "Boron concentration",
+    "Niobium concentration",
+    "Tin concentration",
+    "Arsenic concentration",
+    "Antimony concentration",
 ]
 
 WELD_TYPE = ["MMA", "SA", "FCA", "TSA", "ShMA", "NGSAW", "NGGMA", "SAA", "GTAA", "GMAA"]
@@ -213,6 +227,36 @@ def get_data(
     y_train, y_test = replace_nan(y_train, y_test, method=nan_values)
 
     return X_train, X_test, y_train, y_test
+
+def get_data_information(
+    columns: List[str] = COLUMNS_FLOAT,
+    filename: str = "welddb/welddb.data",
+    output_filename: str = "readme_table.md",
+) -> pd.DataFrame:
+    """Returns a dataframe with the mean, std, median, min and max of the float columns."""
+    
+    data = pd.read_csv(filename, delim_whitespace=True, header=None, names=COLUMNS)
+    data = data[columns]
+    remove_anomalies(data)
+    data.replace("N", pd.NA, inplace=True)
+    data = convert_to_float(data, columns, errors='ignore')
+    data_information = pd.DataFrame(
+        np.zeros((5, len(columns)), dtype=float), columns=columns
+    )
+    data_information.iloc[0] = data.mean()
+    data_information.iloc[1] = data.std()
+    data_information.iloc[2] = data.median()
+    data_information.iloc[3] = data.min()
+    data_information.iloc[4] = data.max()
+
+    # Convert to Markdown format
+    markdown_table = data_information.to_markdown(index=False)
+
+    # Save the Markdown table to a .md file
+    with open(output_filename, "w") as f:
+        f.write(markdown_table)
+
+    return data_information
 
 
 def get_cross_validation_data(
@@ -291,12 +335,14 @@ def get_mean_std(data: pd.DataFrame, column: str) -> Tuple[float, float]:
     values = get_defined(data, column)
     return float(values.mean()), float(values.std())
 
+def get_min_max(data: pd.DataFrame, column: str) -> Tuple[float, float]:
+    values = get_defined(data, column)
+    return float(values.min()), float(values.max())
 
 def one_hot_encode(data: pd.DataFrame, column: str, prefix: str = None) -> pd.DataFrame:
     encoded_columns = pd.get_dummies(data[column], prefix=prefix)
     data.drop(column, axis=1, inplace=True)
     return pd.concat([data, encoded_columns], axis=1)
-
 
 def remove_anomalies(data: pd.DataFrame) -> pd.DataFrame:
     for column in data.columns:
@@ -306,7 +352,7 @@ def remove_anomalies(data: pd.DataFrame) -> pd.DataFrame:
     if "Nitrogen concentration" in data.columns:
         data["Nitrogen concentration"] = data["Nitrogen concentration"].replace(
             r"(\d+)tot(\d+|nd)res", r"\1", regex=True
-        )  # Replace 99tot99res by N
+        )  # Replace 99tot99res by 99
     if "Electrode positive or negative" in data.columns:
         data["Electrode positive or negative"] = data[
             "Electrode positive or negative"
