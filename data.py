@@ -155,12 +155,14 @@ IMPURITIES = [
     "Sulphur concentration",
     "Phosphorus concentration",
     "Oxygen concentration",
+    "Titanium concentration",
     "Nitrogen concentration",
+    "Aluminium concentration",
     "Boron concentration",
     "Niobium concentration",
     "Tin concentration",
     "Arsenic concentration",
-    "Antimony concentration",
+    "Antimony concentration"
 ]
 
 WELD_TYPE = ["MMA", "SA", "FCA", "TSA", "ShMA", "NGSAW", "NGGMA", "SAA", "GTAA", "GMAA"]
