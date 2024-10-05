@@ -91,5 +91,9 @@
 | Ferrite with second phase                  | 25.9556       | 21.2835       | 18            | 3             | 100           |              
 | Acicular ferrite                           | 52.8333       | 23.4838       | 60            | 0             |               |              
 | Martensite                                 | 0.337079      | 3.17999       | 0             | 0             |               |              
-| Ferrite with carbide aggregate             | 0.438202      | 1.39769       | 0             | 0             |               |              
+| Ferrite with carbide aggregate             | 0.438202      | 1.39769       | 0             | 0             |               |    
 
+# How to run ? :
+Go to the the file corresponding to the model you want to run, among linear_regression, nn, random_forest (best results atm)
+Set the parameters of train() and get_data()
+execute the file.

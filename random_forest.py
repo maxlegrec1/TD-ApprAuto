@@ -7,7 +7,7 @@ from train import print_scores, train
 target_features = ["Yield strength", "Ultimate tensile strength"]
 
 X_train, X_test, y_train, y_test = get_data(
-    target_features, test_size=0.2, drop_y_nan_values=True, nan_values="Median", n_pca=None
+    target_features, test_size=0.2, drop_y_nan_values=True, nan_values="Custom1", n_pca=None
 )
 
 model = train(
@@ -16,8 +16,9 @@ model = train(
     y_train,
     n_estimators=100,
     random_state=42,
-    print_results=True,
+    print_results=False,
 )
+
 print_scores(model, X_train, X_test, y_train, y_test)
 
 # feature_importances = model.feature_importances_
