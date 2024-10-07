@@ -89,9 +89,9 @@
 | 50 % FATT                                  | -31.0968      | 43.6443       | -15           | -126          | 30            |               
 | Primary ferrite in microstructure          | 19.1735       | 10.9827       | 19            | 0             | 48            |               
 | Ferrite with second phase                  | 25.9556       | 21.2835       | 18            | 3             | 100           |              
-| Acicular ferrite                           | 52.8333       | 23.4838       | 60            | 0             |               |              
-| Martensite                                 | 0.337079      | 3.17999       | 0             | 0             |               |              
-| Ferrite with carbide aggregate             | 0.438202      | 1.39769       | 0             | 0             |               |    
+| Acicular ferrite                           | 52.8333       | 23.4838       | 60            | 0             | 88            |              
+| Martensite                                 | 0.337079      | 3.17999       | 0             | 0             | 30            |              
+| Ferrite with carbide aggregate             | 0.438202      | 1.39769       | 0             | 0             | 8             |    
 
 # How to run ? :
 Go to the the file corresponding to the model you want to run, among linear_regression, nn, random_forest (best results atm)

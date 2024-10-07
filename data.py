@@ -381,7 +381,7 @@ def remove_anomalies(data: pd.DataFrame) -> pd.DataFrame:
     if "Nitrogen concentration" in data.columns:
         data["Nitrogen concentration"] = data["Nitrogen concentration"].replace(
             r"(\d+)tot(\d+|nd)res", r"\1", regex=True
-        )  # Replace 99tot99res by 99
+        )  # Replace 99tot55res by 99
     if "Electrode positive or negative" in data.columns:
         data["Electrode positive or negative"] = data[
             "Electrode positive or negative"
