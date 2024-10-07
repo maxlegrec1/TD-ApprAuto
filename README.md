@@ -95,5 +95,5 @@
 
 # How to run ? :
 Go to the the file corresponding to the model you want to run, among linear_regression, nn, random_forest (best results atm)
-Set the parameters of train() and get_data()
+Set the parameters of `train()` and `get_data()`
 execute the file.
