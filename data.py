@@ -215,11 +215,13 @@ def get_data(
     if isinstance(target_features, str):
         target_features = [target_features]
 
-    columns = features + target_features
+    columns = set(features).union(target_features)
 
-    assert set(columns).issubset(
+    assert columns.issubset(
         COLUMNS
     ), f"These columns are not in the data: {', '.join([col for col in columns if col not in COLUMNS])}"
+
+    columns = list(columns)
 
     data = pd.read_csv(filename, delim_whitespace=True, header=None, names=COLUMNS)
     data = data[columns]
@@ -315,9 +317,10 @@ def replace_nan(
         return data_train, data_test
 
     for column in data_train.columns:
-        if (
-            data_train[column].isna().all() or method == "Zero"
-        ):  # If all values are NaN, fill with 0
+        if column in COLUMNS_STRING:
+            continue
+        
+        if data_train[column].isna().all() or method == "Zero":  # If all values are NaN, fill with 0
             func = lambda: 0
         elif method == "Gaussian":
             mean, std = get_mean_std(data_train, column)
@@ -375,26 +378,24 @@ def one_hot_encode(data: pd.DataFrame, column: str, prefix: str = None) -> pd.Da
 
 def remove_anomalies(data: pd.DataFrame) -> pd.DataFrame:
     for column in data.columns:
-        data[column] = data[column].replace(
-            r"<(\d+)", r"\1", regex=True
+        data[column].replace(
+            r"<(\d+)", r"\1", regex=True, inplace=True
         )  # Replace <99 by 99
     if "Nitrogen concentration" in data.columns:
-        data["Nitrogen concentration"] = data["Nitrogen concentration"].replace(
-            r"(\d+)tot(\d+|nd)res", r"\1", regex=True
+        data["Nitrogen concentration"].replace(
+            r"(\d+)tot(\d+|nd)res", r"\1", regex=True, inplace=True
         )  # Replace 99tot55res by 99
     if "Electrode positive or negative" in data.columns:
-        data["Electrode positive or negative"] = data[
-            "Electrode positive or negative"
-        ].replace(
-            r"\d+", "N", regex=True
+        data["Electrode positive or negative"].replace(
+            r"\d+", "N", regex=True, inplace=True
         )  # Replace 0 by N
     if "Interpass temperature" in data.columns:
-        data["Interpass temperature"] = data["Interpass temperature"].replace(
-            r"\d+-\d+", "175", regex=True
+        data["Interpass temperature"].replace(
+            r"\d+-\d+", "175", regex=True, inplace=True
         )  # Replace 150-200 by 175
     if "Hardness" in data.columns:
-        data["Hardness"] = data["Hardness"].replace(
-            r"(\d+)\(?Hv\d+\)?", r"\1", regex=True
+        data["Hardness"].replace(
+            r"(\d+)\(?Hv\d+\)?", r"\1", regex=True, inplace=True
         )  # Replace 99(Hv30) by 99
     return data
 
