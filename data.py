@@ -3,6 +3,7 @@ from typing import Generator, List, Literal, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold, train_test_split
+
 from pca import pca
 
 COLUMNS = [
@@ -162,7 +163,7 @@ IMPURITIES = [
     "Niobium concentration",
     "Tin concentration",
     "Arsenic concentration",
-    "Antimony concentration"
+    "Antimony concentration",
 ]
 
 CORE_MATERIALS = [
@@ -191,7 +192,7 @@ def get_data(
     nan_values: Literal["Gaussian", "Mean", "Median", "Zero", "Remove", None] = None,
     test_size: Optional[float] = None,
     random_state: int = 42,
-    n_pca: int | None = None,
+    n_pca: Optional[int] = None,
     one_hot_encode: bool = True,
 ) -> Union[
     Tuple[pd.DataFrame, pd.DataFrame],
@@ -199,7 +200,7 @@ def get_data(
 ]:
     """If test_size is None, returns X, y.\n
     Otherwise, returns X_train, X_test, y_train, y_test.
-    
+
     @param target_features: The target features (or labels) to predict.
     @param features: The features to use.
     @param filename: The filename of the data (should not need to be changed).
@@ -228,12 +229,13 @@ def get_data(
 
     remove_anomalies(data)
     data.replace("N", pd.NA, inplace=True)
-    
     if one_hot_encode:
         data = one_hot_encode_all(data, columns)
-    
-    data = convert_to_float(data, columns, errors='ignore' if one_hot_encode else 'raise')
-    
+
+    data = convert_to_float(
+        data, columns, errors="ignore" if one_hot_encode else "raise"
+    )
+
     if drop_y_nan_values:
         data.dropna(subset=target_features, inplace=True)
 
@@ -248,10 +250,13 @@ def get_data(
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=test_size, random_state=random_state
     )
-    X_train, X_test = pca(*replace_nan(X_train, X_test, method=nan_values), n_components=n_pca)
+    X_train, X_test = pca(
+        *replace_nan(X_train, X_test, method=nan_values), n_components=n_pca
+    )
     y_train, y_test = replace_nan(y_train, y_test, method=nan_values)
 
     return X_train, X_test, y_train, y_test
+
 
 def get_data_information(
     columns: List[str] = COLUMNS_FLOAT,
@@ -259,12 +264,12 @@ def get_data_information(
     output_filename: str = "readme_table.md",
 ) -> pd.DataFrame:
     """Returns a dataframe with the mean, std, median, min and max of the float columns."""
-    
+
     data = pd.read_csv(filename, delim_whitespace=True, header=None, names=COLUMNS)
     data = data[columns]
     remove_anomalies(data)
     data.replace("N", pd.NA, inplace=True)
-    data = convert_to_float(data, columns, errors='ignore')
+    data = convert_to_float(data, columns, errors="ignore")
     data_information = pd.DataFrame(
         np.zeros((5, len(columns)), dtype=float), columns=columns
     )
@@ -302,7 +307,9 @@ def get_cross_validation_data(
 def replace_nan(
     data_train: pd.DataFrame,
     data_test: Optional[pd.DataFrame] = None,
-    method: Literal["Gaussian", "Mean", "Median", "Zero", "Remove", "Custom1", None] = None,
+    method: Literal[
+        "Gaussian", "Mean", "Median", "Zero", "Remove", "Custom1", None
+    ] = None,
 ) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
     """The mean and std are calculated only with the training data."""
     if method is None:
@@ -319,8 +326,10 @@ def replace_nan(
     for column in data_train.columns:
         if column in COLUMNS_STRING:
             continue
-        
-        if data_train[column].isna().all() or method == "Zero":  # If all values are NaN, fill with 0
+
+        if (
+            data_train[column].isna().all() or method == "Zero"
+        ):  # If all values are NaN, fill with 0
             func = lambda: 0
         elif method == "Gaussian":
             mean, std = get_mean_std(data_train, column)
@@ -332,9 +341,11 @@ def replace_nan(
             median = data_train[column].median()
             func = lambda: median
         elif method == "Custom1":
-            if column in CORE_MATERIALS: # If it is a core material and the value is NaN, we assume the material is not used
+            if (
+                column in CORE_MATERIALS
+            ):  # If it is a core material and the value is NaN, we assume the material is not used
                 func = lambda: 0
-            else :
+            else:
                 median = data_train[column].median()
                 func = lambda: median
 
@@ -367,14 +378,17 @@ def get_mean_std(data: pd.DataFrame, column: str) -> Tuple[float, float]:
     values = get_defined(data, column)
     return float(values.mean()), float(values.std())
 
+
 def get_min_max(data: pd.DataFrame, column: str) -> Tuple[float, float]:
     values = get_defined(data, column)
     return float(values.min()), float(values.max())
+
 
 def one_hot_encode(data: pd.DataFrame, column: str, prefix: str = None) -> pd.DataFrame:
     encoded_columns = pd.get_dummies(data[column], prefix=prefix)
     data.drop(column, axis=1, inplace=True)
     return pd.concat([data, encoded_columns], axis=1)
+
 
 def remove_anomalies(data: pd.DataFrame) -> pd.DataFrame:
     for column in data.columns:
@@ -406,7 +420,11 @@ def one_hot_encode_all(data: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
     return data
 
 
-def convert_to_float(data: pd.DataFrame, columns: List[str], errors: Literal['raise', 'coerce', 'ignore'] = 'raise') -> pd.DataFrame:
+def convert_to_float(
+    data: pd.DataFrame,
+    columns: List[str],
+    errors: Literal["raise", "coerce", "ignore"] = "raise",
+) -> pd.DataFrame:
     for column in set(COLUMNS_FLOAT).intersection(columns):
         data[column] = pd.to_numeric(data[column], errors=errors)
     return data

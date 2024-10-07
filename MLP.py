@@ -53,5 +53,9 @@ class MLP(torch.nn.Module):
 
                 # Accumulate the batch loss
                 epoch_loss += loss.item()
-            avg_loss = epoch_loss / len(dataloader)
+            # avg_loss = epoch_loss / len(dataloader)
             # print(f"Epoch [{epoch+1}/{epochs}], Loss: {avg_loss:.4f}")
+
+
+# model = MLP([41], [2])
+# print(sum(p.numel() for p in model.parameters()))
