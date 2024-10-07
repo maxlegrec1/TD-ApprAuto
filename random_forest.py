@@ -10,10 +10,10 @@ target_features = ["Yield strength", "Ultimate tensile strength"]
 
 X_train, X_test, y_train, y_test = get_data(
     target_features,
-    set(FEATURES) - set(COLUMNS_STRING),
+    # set(FEATURES) - set(COLUMNS_STRING),
     test_size=0.2,
     drop_y_nan_values=True,
-    nan_values="Zero",
+    nan_values="Custom1",
     # n_pca=15,
 )
 
@@ -23,8 +23,9 @@ model = train(
     y_train,
     n_estimators=100,
     random_state=42,
-    print_results=True,
+    print_results=False,
 )
+
 print_scores(model, X_train, X_test, y_train, y_test)
 
 feature_importances = model.models[0].feature_importances_

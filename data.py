@@ -58,6 +58,7 @@ COLUMNS_STRING = [
     "Type of weld",
     "Weld ID",
 ]
+
 COLUMNS_FLOAT = [
     "Carbon concentration",
     "Silicon concentration",
@@ -116,6 +117,7 @@ TARGET_FEATURES = [
     "Martensite",
     "Ferrite with carbide aggreagate",
 ]
+
 FEATURES = [
     "Carbon concentration",
     "Silicon concentration",
@@ -149,6 +151,33 @@ FEATURES = [
     "Post weld heat treatment time",
 ]
 
+IMPURITIES = [
+    "Sulphur concentration",
+    "Phosphorus concentration",
+    "Oxygen concentration",
+    "Titanium concentration",
+    "Nitrogen concentration",
+    "Aluminium concentration",
+    "Boron concentration",
+    "Niobium concentration",
+    "Tin concentration",
+    "Arsenic concentration",
+    "Antimony concentration"
+]
+
+CORE_MATERIALS = [
+    "Carbon concentration",
+    "Silicon concentration",
+    "Manganese concentration",
+    "Nickel concentration",
+    "Chromium concentration",
+    "Molybdenum concentration",
+    "Vanadium concentration",
+    "Copper concentration",
+    "Cobalt concentration",
+    "Tungsten concentration",
+]
+
 WELD_TYPE = ["MMA", "SA", "FCA", "TSA", "ShMA", "NGSAW", "NGGMA", "SAA", "GTAA", "GMAA"]
 ELECTRODE_TYPE = ["+", "-"]
 AC_DC = ["AC", "DC"]
@@ -158,7 +187,7 @@ def get_data(
     target_features: Union[str, List[str]] = TARGET_FEATURES,
     features: List[str] = FEATURES,
     filename: str = "welddb/welddb.data",
-    drop_y_nan_values: bool = False,
+    drop_y_nan_values: bool = True,
     nan_values: Literal["Gaussian", "Mean", "Median", "Zero", "Remove", None] = None,
     test_size: Optional[float] = None,
     random_state: int = 42,
@@ -169,7 +198,20 @@ def get_data(
     Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame],
 ]:
     """If test_size is None, returns X, y.\n
-    Otherwise, returns X_train, X_test, y_train, y_test."""
+    Otherwise, returns X_train, X_test, y_train, y_test.
+    
+    @param target_features: The target features (or labels) to predict.
+    @param features: The features to use.
+    @param filename: The filename of the data (should not need to be changed).
+    @param drop_y_nan_values: If True, drops the rows with NaN values in the target features.
+    @param nan_values: The method to replace the features NaN values.
+    @param test_size: The proportion of the dataset to include in the test split.
+    @param random_state: The seed used by the random number generator.
+    @param n_pca: The number of components to use in PCA. If None, PCA is not used.
+    @param one_hot_encode: If True, one hot encode the categorical columns.
+
+    for "Custom1" nan_values, we assume that the core materials are not used if the value is NaN, so we replace it with 0.
+    """
     if isinstance(target_features, str):
         target_features = [target_features]
 
@@ -211,6 +253,36 @@ def get_data(
 
     return X_train, X_test, y_train, y_test
 
+def get_data_information(
+    columns: List[str] = COLUMNS_FLOAT,
+    filename: str = "welddb/welddb.data",
+    output_filename: str = "readme_table.md",
+) -> pd.DataFrame:
+    """Returns a dataframe with the mean, std, median, min and max of the float columns."""
+    
+    data = pd.read_csv(filename, delim_whitespace=True, header=None, names=COLUMNS)
+    data = data[columns]
+    remove_anomalies(data)
+    data.replace("N", pd.NA, inplace=True)
+    data = convert_to_float(data, columns, errors='ignore')
+    data_information = pd.DataFrame(
+        np.zeros((5, len(columns)), dtype=float), columns=columns
+    )
+    data_information.iloc[0] = data.mean()
+    data_information.iloc[1] = data.std()
+    data_information.iloc[2] = data.median()
+    data_information.iloc[3] = data.min()
+    data_information.iloc[4] = data.max()
+
+    # Convert to Markdown format
+    markdown_table = data_information.to_markdown(index=False)
+
+    # Save the Markdown table to a .md file
+    with open(output_filename, "w") as f:
+        f.write(markdown_table)
+
+    return data_information
+
 
 def get_cross_validation_data(
     X: pd.DataFrame, y: pd.DataFrame, n_folds: int = 5, random_state: int = 42
@@ -230,7 +302,7 @@ def get_cross_validation_data(
 def replace_nan(
     data_train: pd.DataFrame,
     data_test: Optional[pd.DataFrame] = None,
-    method: Literal["Gaussian", "Mean", "Median", "Zero", "Remove", None] = None,
+    method: Literal["Gaussian", "Mean", "Median", "Zero", "Remove", "Custom1", None] = None,
 ) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
     """The mean and std are calculated only with the training data."""
     if method is None:
@@ -259,6 +331,12 @@ def replace_nan(
         elif method == "Median":
             median = data_train[column].median()
             func = lambda: median
+        elif method == "Custom1":
+            if column in CORE_MATERIALS: # If it is a core material and the value is NaN, we assume the material is not used
+                func = lambda: 0
+            else :
+                median = data_train[column].median()
+                func = lambda: median
 
         data_train[column] = data_train[column].apply(
             lambda x: func() if pd.isna(x) else x
@@ -289,12 +367,14 @@ def get_mean_std(data: pd.DataFrame, column: str) -> Tuple[float, float]:
     values = get_defined(data, column)
     return float(values.mean()), float(values.std())
 
+def get_min_max(data: pd.DataFrame, column: str) -> Tuple[float, float]:
+    values = get_defined(data, column)
+    return float(values.min()), float(values.max())
 
 def one_hot_encode(data: pd.DataFrame, column: str, prefix: str = None) -> pd.DataFrame:
     encoded_columns = pd.get_dummies(data[column], prefix=prefix)
     data.drop(column, axis=1, inplace=True)
     return pd.concat([data, encoded_columns], axis=1)
-
 
 def remove_anomalies(data: pd.DataFrame) -> pd.DataFrame:
     for column in data.columns:
@@ -304,7 +384,7 @@ def remove_anomalies(data: pd.DataFrame) -> pd.DataFrame:
     if "Nitrogen concentration" in data.columns:
         data["Nitrogen concentration"].replace(
             r"(\d+)tot(\d+|nd)res", r"\1", regex=True, inplace=True
-        )  # Replace 99tot99res by N
+        )  # Replace 99tot99res by 99
     if "Electrode positive or negative" in data.columns:
         data["Electrode positive or negative"].replace(
             r"\d+", "N", regex=True, inplace=True

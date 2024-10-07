@@ -24,6 +24,17 @@ def train(
     print_results: bool = False,
     **model_params: dict,
 ) -> AverageModel:
+    """
+    Train a model using cross-validation and return an AverageModel object.
+
+    @param model_type: The model class to use.
+    @param X: The input data.
+    @param y: The target data.
+    @param metric: The metric to evaluate the model.
+    @param n_folds: The number of cross-validation folds.
+    @param print_results: Whether to print intermediate results or not.
+    @param model_params: The parameters to pass to the model constructor.
+    """
     train_metrics = []
     val_metrics = []
     models = []
