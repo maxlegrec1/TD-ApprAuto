@@ -1,5 +1,4 @@
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
 import pandas as pd
 
 
@@ -9,7 +8,6 @@ def pca(X_train: pd.DataFrame, X_test: pd.DataFrame | None = None, n_components:
             return X_train
         return X_train, X_test
     
-    # scaler = StandardScaler()
     pca = PCA(n_components=n_components)
 
     X_train_pca = pd.DataFrame(pca.fit_transform(X_train))

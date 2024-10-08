@@ -1,5 +1,6 @@
 from typing import Generator, List, Literal, Optional, Tuple, Union
 
+from sklearn.preprocessing import StandardScaler
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold, train_test_split
@@ -188,11 +189,12 @@ def get_data(
     features: List[str] = FEATURES,
     filename: str = "welddb/welddb.data",
     drop_y_nan_values: bool = True,
-    nan_values: Literal["Gaussian", "Mean", "Median", "Zero", "Remove", None] = None,
+    nan_values: Optional[Literal["Gaussian", "Mean", "Median", "Zero", "Remove"]] = None,
     test_size: Optional[float] = None,
     random_state: int = 42,
-    n_pca: int | None = None,
+    n_pca: Optional[int] = None,
     one_hot_encode: bool = True,
+    normalize: bool = False,
 ) -> Union[
     Tuple[pd.DataFrame, pd.DataFrame],
     Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame],
@@ -209,6 +211,7 @@ def get_data(
     @param random_state: The seed used by the random number generator.
     @param n_pca: The number of components to use in PCA. If None, PCA is not used.
     @param one_hot_encode: If True, one hot encode the categorical columns.
+    @param normalize: If True, normalize the data.
 
     for "Custom1" nan_values, we assume that the core materials are not used if the value is NaN, so we replace it with 0.
     """
@@ -220,6 +223,8 @@ def get_data(
     assert columns.issubset(
         COLUMNS
     ), f"These columns are not in the data: {', '.join([col for col in columns if col not in COLUMNS])}"
+    
+    assert normalize or n_pca is None, "PCA can only be used with normalization"
 
     columns = list(columns)
 
@@ -241,17 +246,28 @@ def get_data(
     y = data[target_features]  # Target
 
     if test_size is None:
-        X: pd.DataFrame = pca(replace_nan(X, method=nan_values), n_components=n_pca)
-        y: pd.DataFrame = replace_nan(y, method=nan_values)
+        X = replace_nan(X, method=nan_values)
+        y = replace_nan(y, method=nan_values)
+        
+        if normalize:
+            X = scale(X)
+            X = pca(X, n_components=n_pca)
+        
         return X, y
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=test_size, random_state=random_state
     )
-    X_train, X_test = pca(*replace_nan(X_train, X_test, method=nan_values), n_components=n_pca)
+    
+    X_train, X_test = replace_nan(X_train, X_test, method=nan_values)
     y_train, y_test = replace_nan(y_train, y_test, method=nan_values)
+    
+    if normalize:
+        X_train, X_test = scale(X_train, X_test)
+        X_train, X_test = pca(X_train, X_test, n_components=n_pca)
 
     return X_train, X_test, y_train, y_test
+
 
 def get_data_information(
     columns: List[str] = COLUMNS_FLOAT,
@@ -299,10 +315,25 @@ def get_cross_validation_data(
         ]
 
 
+def scale(
+    data_train: pd.DataFrame,
+    data_test: Optional[pd.DataFrame] = None,
+) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
+    """Normalizes the data using the StandardScaler."""
+    
+    scaler = StandardScaler()
+    data_train = pd.DataFrame(scaler.fit_transform(data_train), columns=data_train.columns)
+    if data_test is None:
+        return data_train
+    
+    data_test = pd.DataFrame(scaler.transform(data_test), columns=data_test.columns)
+    return data_train, data_test
+
+
 def replace_nan(
     data_train: pd.DataFrame,
     data_test: Optional[pd.DataFrame] = None,
-    method: Literal["Gaussian", "Mean", "Median", "Zero", "Remove", "Custom1", None] = None,
+    method: Optional[Literal["Gaussian", "Mean", "Median", "Zero", "Remove", "Custom1"]] = None,
 ) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
     """The mean and std are calculated only with the training data."""
     if method is None:
