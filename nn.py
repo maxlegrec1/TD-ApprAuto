@@ -8,7 +8,7 @@ X_train, X_test, y_train, y_test = get_data(
     target_features=["Yield strength", "Ultimate tensile strength"],
     test_size=0.2,
     drop_y_nan_values=True,
-    nan_values="Median",
+    nan_values="Custom1",
     random_state=1,
 )
 

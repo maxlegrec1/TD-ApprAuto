@@ -1,8 +1,15 @@
+from typing import Optional, Tuple, Union
+
+import pandas as pd
 from sklearn.decomposition import PCA
 import pandas as pd
 
 
-def pca(X_train: pd.DataFrame, X_test: pd.DataFrame | None = None, n_components: int | None = 10) -> tuple[pd.DataFrame, pd.DataFrame] | pd.DataFrame:
+def pca(
+    X_train: pd.DataFrame,
+    X_test: Optional[pd.DataFrame] = None,
+    n_components: Optional[int] = 10,
+) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
     if n_components is None:
         if X_test is None:
             return X_train

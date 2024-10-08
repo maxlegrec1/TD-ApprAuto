@@ -1,10 +1,9 @@
-from sklearn.ensemble import RandomForestRegressor
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor
 
-from data import get_data, FEATURES, COLUMNS_STRING
+from data import COLUMNS_STRING, FEATURES, get_data
 from train import print_scores, train
-
 
 target_features = ["Yield strength", "Ultimate tensile strength"]
 
@@ -15,6 +14,7 @@ X_train, X_test, y_train, y_test = get_data(
     drop_y_nan_values=True,
     nan_values="Custom1",
     # n_pca=15,
+    random_state=1,
 )
 
 model = train(
@@ -23,7 +23,7 @@ model = train(
     y_train,
     n_estimators=100,
     random_state=42,
-    print_results=False,
+    print_results=True,
 )
 
 print_scores(model, X_train, X_test, y_train, y_test)
@@ -33,8 +33,8 @@ features = X_train.columns
 indices = np.argsort(feature_importances)
 
 plt.figure(figsize=(10, 6))
-plt.barh(range(len(indices)), feature_importances[indices], color='b', align='center')
+plt.barh(range(len(indices)), feature_importances[indices], color="b", align="center")
 plt.yticks(range(len(indices)), [features[i] for i in indices])
-plt.xlabel('Relative Importance')
-plt.title('Feature Importance in Random Forest')
+plt.xlabel("Relative Importance")
+plt.title("Feature Importance in Random Forest")
 plt.show()
