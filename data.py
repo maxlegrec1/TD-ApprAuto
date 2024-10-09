@@ -1,9 +1,9 @@
 from typing import Generator, List, Literal, Optional, Tuple, Union
 
-from sklearn.preprocessing import StandardScaler
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold, train_test_split
+from sklearn.preprocessing import StandardScaler
 
 from pca import pca
 
@@ -190,7 +190,9 @@ def get_data(
     features: List[str] = FEATURES,
     filename: str = "welddb/welddb.data",
     drop_y_nan_values: bool = True,
-    nan_values: Optional[Literal["Gaussian", "Mean", "Median", "Zero", "Remove"]] = None,
+    nan_values: Optional[
+        Literal["Gaussian", "Mean", "Median", "Zero", "Remove"]
+    ] = None,
     test_size: Optional[float] = None,
     random_state: int = 42,
     n_pca: Optional[int] = None,
@@ -224,7 +226,7 @@ def get_data(
     assert columns.issubset(
         COLUMNS
     ), f"These columns are not in the data: {', '.join([col for col in columns if col not in COLUMNS])}"
-    
+
     assert normalize or n_pca is None, "PCA can only be used with normalization"
 
     columns = list(columns)
@@ -250,20 +252,21 @@ def get_data(
     if test_size is None:
         X = replace_nan(X, method=nan_values)
         y = replace_nan(y, method=nan_values)
-        
+
         if normalize:
             X = scale(X)
             X = pca(X, n_components=n_pca)
-        
+
         return X, y
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=test_size, random_state=random_state
     )
-    
+
     X_train, X_test = replace_nan(X_train, X_test, method=nan_values)
-    y_train, y_test = replace_nan(y_train, y_test, method=nan_values)
-    
+
+    # y_train, y_test = replace_nan(y_train, y_test, method=nan_values)
+
     if normalize:
         X_train, X_test = scale(X_train, X_test)
         X_train, X_test = pca(X_train, X_test, n_components=n_pca)
@@ -322,12 +325,14 @@ def scale(
     data_test: Optional[pd.DataFrame] = None,
 ) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
     """Normalizes the data using the StandardScaler."""
-    
+
     scaler = StandardScaler()
-    data_train = pd.DataFrame(scaler.fit_transform(data_train), columns=data_train.columns)
+    data_train = pd.DataFrame(
+        scaler.fit_transform(data_train), columns=data_train.columns
+    )
     if data_test is None:
         return data_train
-    
+
     data_test = pd.DataFrame(scaler.transform(data_test), columns=data_test.columns)
     return data_train, data_test
 
@@ -440,7 +445,7 @@ def remove_anomalies(data: pd.DataFrame) -> pd.DataFrame:
             r"(\d+)\(?Hv\d+\)?", r"\1", regex=True, inplace=True
         )  # Replace 99(Hv30) by 99
     if "Type of weld" in data.columns:
-        data["Type of weld"].replace("ShMA","MMA",inplace=True)
+        data["Type of weld"].replace("ShMA", "MMA", inplace=True)
     return data
 
 

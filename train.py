@@ -7,11 +7,17 @@ from data import get_cross_validation_data
 
 
 class AverageModel(BaseEstimator, RegressorMixin):
-    def __init__(self, models: list):
+    def __init__(self, models: list, mode: str = "median"):
         self.models = models
+        self.mode = mode
 
     def predict(self, X):
-        preds = np.mean([model.predict(X) for model in self.models], axis=0)
+        if self.mode == "mean":
+            preds = np.mean([model.predict(X) for model in self.models], axis=0)
+        elif self.mode == "median":
+            preds = np.median([model.predict(X) for model in self.models], axis=0)
+        else:
+            raise ValueError("Incorrect Mode entered")
         return preds
 
 
@@ -83,3 +89,5 @@ def print_scores(
 
     print(f"Train score: {train_score}")
     print(f"Test score: {test_score}")
+
+    return test_score
