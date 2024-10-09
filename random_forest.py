@@ -55,14 +55,7 @@ for random_state in tqdm(range(0, 50, 5)):
     # reorder columns so that the order match the model's expectation
     X_train = X_train[model1.models[0].feature_names_in_]
     X_test = X_test[model1.models[0].feature_names_in_]
-    """
-    for i in range(X_train.shape[0]):
-        pred = model1.predict(X_train.iloc[i : i + 1])[0]
-        if np.isnan(np.sum(y_train.iloc[i, 0])):
-            y_train.iloc[i, 0] = pred[0]
-        if np.isnan(np.sum(y_train.iloc[i, 1])):
-            y_train.iloc[i, 1] = pred[1]
-    """
+
     predictions = model1.predict(X_train)
 
     # Create a DataFrame from the predictions
