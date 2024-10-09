@@ -12,6 +12,9 @@ data["Type of weld"]=data["Type of weld"].replace("ShMA","MMA")
 data=data.replace("N",pd.NA)
 def weld_type_to_rename(columns:list[str]):
     selected_data=data[columns+["Type of weld"]]
+
+    #we drop instance where absolutely no data is given
+    
     #first idea is to show missing data according to type of weld
     weld_types=selected_data["Type of weld"].unique()
 
@@ -28,6 +31,7 @@ def weld_type_to_rename(columns:list[str]):
         missing_values_by_weld_type[weld_type]=missing_values
 
     # we should be checking at least std, maybe min max etc
+    missing_values_by_weld_type["std"]=missing_values_by_weld_type.std(axis=1)
     return(missing_values_by_weld_type,no_data)
 
 

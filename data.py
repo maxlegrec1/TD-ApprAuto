@@ -440,7 +440,7 @@ def remove_anomalies(data: pd.DataFrame) -> pd.DataFrame:
             r"(\d+)\(?Hv\d+\)?", r"\1", regex=True, inplace=True
         )  # Replace 99(Hv30) by 99
     if "Type of weld" in data.columns:
-        data["Type of Weld"].replace("ShMA","MMA",inplace=True)
+        data["Type of weld"].replace("ShMA","MMA",inplace=True)
     return data
 
 
