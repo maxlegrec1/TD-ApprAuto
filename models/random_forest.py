@@ -6,14 +6,15 @@ import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from tqdm import tqdm
 
-from data import COLUMNS_STRING, FEATURES, get_data
-from train import print_scores, train
+from trainer.train import print_scores, train
+from utils.data import COLUMNS_STRING, FEATURES, get_data
 
 target_features = ["Yield strength", "Ultimate tensile strength"]
 
 test_scores_model1 = []
 test_scores_model2 = []
-for random_state in tqdm(range(0, 50, 5)):
+# for random_state in tqdm(range(0, 50, 5)):
+for random_state in tqdm([1]):
     X_train, X_test, y_train, y_test = get_data(
         target_features,
         test_size=0.2,
@@ -31,8 +32,6 @@ for random_state in tqdm(range(0, 50, 5)):
 
     test_scores_model1.append(print_scores(model1, X_train, X_test, y_train, y_test))
 
-    with open("model.pkl", "wb") as file:
-        pickle.dump(model1, file, pickle.HIGHEST_PROTOCOL)
     ######################################## SECOND TRAINING BEGINS ##########################################################
 
     X_train, X_test, y_train, y_test = get_data(
@@ -47,10 +46,6 @@ for random_state in tqdm(range(0, 50, 5)):
     # Use these indices to filter both X_test and y_test
     X_test = X_test[valid_indices]
     y_test = y_test[valid_indices]
-
-    # load the supervised model
-    with open("model.pkl", "rb") as f:
-        model1 = pickle.load(f)
 
     # reorder columns so that the order match the model's expectation
     X_train = X_train[model1.models[0].feature_names_in_]

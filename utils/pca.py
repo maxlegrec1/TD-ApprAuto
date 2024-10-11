@@ -2,7 +2,6 @@ from typing import Optional, Tuple, Union
 
 import pandas as pd
 from sklearn.decomposition import PCA
-import pandas as pd
 
 
 def pca(
@@ -14,7 +13,7 @@ def pca(
         if X_test is None:
             return X_train
         return X_train, X_test
-    
+
     pca = PCA(n_components=n_components)
 
     X_train_pca = pd.DataFrame(pca.fit_transform(X_train))

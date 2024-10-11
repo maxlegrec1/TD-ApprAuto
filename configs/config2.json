@@ -1,0 +1,23 @@
+{
+  "models": [
+    {
+      "name": "random_forest",
+      "n_estimators":100
+    },
+    {
+      "name": "linear_regression"
+    }
+  ],
+  "target_features": [["Yield strength", "Ultimate tensile strength"]],
+  "random_states": 30,
+  "test_size": [0.1,0.2,0.3],
+  "methods": [
+    {"name":"supervised"},
+    {"name":"semi_supervised",
+    "threshold": 50},
+    {"name":"semi_supervised",
+    "threshold": 60},
+    {"name":"semi_supervised",
+    "threshold": 70}
+]
+}

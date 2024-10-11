@@ -6,8 +6,8 @@ import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from tqdm import tqdm
 
-from data import COLUMNS_STRING, FEATURES, get_data
-from train import print_scores, train
+from utils.data import COLUMNS_STRING, FEATURES, get_data
+from utils.train import print_scores, train
 
 target_features = ["Yield strength", "Ultimate tensile strength"]
 

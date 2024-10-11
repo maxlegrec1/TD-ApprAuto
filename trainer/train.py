@@ -1,9 +1,9 @@
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, RegressorMixin
-from sklearn.metrics import r2_score
+from sklearn.metrics import mean_squared_error, r2_score
 
-from data import get_cross_validation_data
+from utils.data import get_cross_validation_data
 
 
 class AverageModel(BaseEstimator, RegressorMixin):
@@ -91,3 +91,39 @@ def print_scores(
     print(f"Test score: {test_score}")
 
     return test_score
+
+
+def calculate_scores(
+    model,
+    X_train: pd.DataFrame,
+    X_test: pd.DataFrame,
+    y_train: pd.DataFrame,
+    y_test: pd.DataFrame,
+    metrics={"r2_score": r2_score, "mse": mean_squared_error},
+):
+    # makes predictions
+    y_train_pred = model.predict(X_train)
+    y_test_pred = model.predict(X_test)
+
+    result_dir = {}
+
+    # calculate global metrics
+    for metric_name, metric in metrics.items():
+
+        train_score = metric(y_train, y_train_pred)
+        test_score = metric(y_test, y_test_pred)
+        result_dir[f"{metric_name}_train"] = train_score
+        result_dir[f"{metric_name}_test"] = test_score
+    # calculate label-wise metrics
+    for metric_name, metric in metrics.items():
+        for column in y_train.columns:
+            train_score = metric(
+                y_train[column], y_train_pred[:, y_train.columns.get_loc(column)]
+            )
+            test_score = metric(
+                y_test[column], y_test_pred[:, y_test.columns.get_loc(column)]
+            )
+            result_dir[f"{metric_name}_{column}_train"] = train_score
+            result_dir[f"{metric_name}_{column}_test"] = test_score
+
+    return result_dir

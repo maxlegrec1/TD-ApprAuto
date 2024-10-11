@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.model_selection import KFold, train_test_split
 from sklearn.preprocessing import StandardScaler
 
-from pca import pca
+from utils.pca import pca
 
 COLUMNS = [
     "Carbon concentration",
@@ -243,9 +243,6 @@ def get_data(
         data, columns, errors="ignore" if one_hot_encode else "raise"
     )
 
-    if drop_y_nan_values:
-        data.dropna(subset=target_features, inplace=True)
-
     X = data.drop(target_features, axis=1)  # Features
     y = data[target_features]  # Target
 
@@ -263,9 +260,16 @@ def get_data(
         X, y, test_size=test_size, random_state=random_state
     )
 
-    X_train, X_test = replace_nan(X_train, X_test, method=nan_values)
+    if drop_y_nan_values:
+        valid_train = ~y_train.isna().any(axis=1)
+        X_train = X_train[valid_train]
+        y_train = y_train[valid_train]
 
-    # y_train, y_test = replace_nan(y_train, y_test, method=nan_values)
+        valid_test = ~y_test.isna().any(axis=1)
+        X_test = X_test[valid_test]
+        y_test = y_test[valid_test]
+
+    X_train, X_test = replace_nan(X_train, X_test, method=nan_values)
 
     if normalize:
         X_train, X_test = scale(X_train, X_test)
