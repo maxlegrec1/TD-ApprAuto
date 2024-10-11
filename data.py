@@ -1,4 +1,4 @@
-from typing import Generator, List, Literal, Optional, Tuple, Union
+from typing import Generator, List, Literal, Optional, Tuple, Union, Callable
 
 from sklearn.preprocessing import StandardScaler
 import numpy as np
@@ -151,6 +151,7 @@ FEATURES = [
     "Type of weld",
     "Post weld heat treatment temperature",
     "Post weld heat treatment time",
+    # "Charpy temperature"
 ]
 
 IMPURITIES = [
@@ -196,6 +197,8 @@ def get_data(
     n_pca: Optional[int] = None,
     one_hot_encode: bool = True,
     normalize: bool = False,
+    quality: Optional[Callable[[pd.Series], float]] = None,
+    plot_pca: bool = False,
 ) -> Union[
     Tuple[pd.DataFrame, pd.DataFrame],
     Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame],
@@ -213,6 +216,8 @@ def get_data(
     @param n_pca: The number of components to use in PCA. If None, PCA is not used.
     @param one_hot_encode: If True, one hot encode the categorical columns.
     @param normalize: If True, normalize the data.
+    @param quality: A function to apply to the target features to convert them to a quality metric. If None, the target features are not modified.
+    @param plot_pca: If True, plot the PCA of the training data.
 
     for "Custom1" nan_values, we assume that the core materials are not used if the value is NaN, so we replace it with 0.
     """
@@ -241,6 +246,14 @@ def get_data(
         data, columns, errors="ignore" if one_hot_encode else "raise"
     )
 
+    if quality is not None:
+        data[target_features] = scale(data[target_features])
+        data_quality = data[target_features].apply(quality, axis=1)
+        data_quality.name = "Quality"
+        data = data.drop(target_features, axis=1)
+        data = pd.concat([data, data_quality], axis=1)
+        target_features = [data_quality.name]
+
     if drop_y_nan_values:
         data.dropna(subset=target_features, inplace=True)
 
@@ -253,7 +266,7 @@ def get_data(
         
         if normalize:
             X = scale(X)
-            X = pca(X, n_components=n_pca)
+            X = pca(X, n_components=n_pca, plot=plot_pca)
         
         return X, y
 
@@ -266,7 +279,7 @@ def get_data(
     
     if normalize:
         X_train, X_test = scale(X_train, X_test)
-        X_train, X_test = pca(X_train, X_test, n_components=n_pca)
+        X_train, X_test = pca(X_train, X_test, n_components=n_pca, plot=plot_pca)
 
     return X_train, X_test, y_train, y_test
 
@@ -341,7 +354,7 @@ def replace_nan(
 ) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
     """The mean and std are calculated only with the training data."""
     if method is None:
-        return data_train if data_test is None else data_train, data_test
+        return data_train if data_test is None else (data_train, data_test)
 
     if method == "Remove":
         data_train = data_train.dropna()
@@ -439,6 +452,9 @@ def remove_anomalies(data: pd.DataFrame) -> pd.DataFrame:
         data["Hardness"].replace(
             r"(\d+)\(?Hv\d+\)?", r"\1", regex=True, inplace=True
         )  # Replace 99(Hv30) by 99
+    
+    # data.drop(data[data["Type of weld"] != "MMA"].index, inplace=True)
+    
     return data
 
 
@@ -460,6 +476,6 @@ def convert_to_float(
 
 if __name__ == "__main__":
     print("Testing data.py...")
-    X, y = get_data("Yield strength")
+    X, y = get_data("Yield strength", set(FEATURES) - set(COLUMNS_STRING), n_pca=2, normalize=True, drop_y_nan_values=True, nan_values="Custom1", plot_pca=True)
+    
     print(X)
-    print(y)

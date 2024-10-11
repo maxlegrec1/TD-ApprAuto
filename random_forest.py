@@ -1,11 +1,29 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
 from data import COLUMNS_STRING, FEATURES, get_data
 from train import print_scores, train
 
-target_features = ["Yield strength", "Ultimate tensile strength"]
+target_features = ["Yield strength", "Ultimate tensile strength", "Elongation", "Reduction of Area"]#, "Charpy impact toughness"]
+
+
+
+def quality(row: pd.Series) -> float:
+    if row.isna().all():
+        return np.nan
+    
+    inv_materials = set(["Martensite", "Ferrite with carbide aggregate", r"50 % FATT"])
+    s = 0.0
+    n = 0
+    for material in row.index:
+        if not np.isnan(row[material]):
+            s += (-1.0 if row[material] in inv_materials else 1.0) * row[material]
+            n += 1
+    
+    return s / n
+
 
 X_train, X_test, y_train, y_test = get_data(
     target_features,
@@ -15,6 +33,7 @@ X_train, X_test, y_train, y_test = get_data(
     nan_values="Custom1",
     # n_pca=15,
     random_state=1,
+    # quality=quality,
 )
 
 model = train(
