@@ -377,7 +377,7 @@ def replace_nan(
 ) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
     """The mean and std are calculated only with the training data."""
     if method is None:
-        return data_train if data_test is None else data_train, data_test
+        return data_train if data_test is None else (data_train, data_test)
 
     if method == "Remove":
         data_train = data_train.dropna()

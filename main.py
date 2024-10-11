@@ -62,7 +62,8 @@ if __name__ == "__main__":
         for key, value in final_results.items():
             final_results[key] = value / num_states
         instances[i].update(final_results)
+    
     with open(f"{run_dir}/output.json", "w") as f:
-        json.dump(instances, f)
+        json.dump(instances, f, indent=4)
 
     exit()
