@@ -1,3 +1,4 @@
+import argparse
 import itertools
 import random
 
@@ -57,3 +58,13 @@ def parse_instances(instances):
         parsed[-1]["model"] = model_dict[instance["model"]]
         parsed[-1]["method"] = method_dict[instance["method"]]
     return parsed
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Parse config file path.")
+    parser.add_argument(
+        "--cfg", type=str, required=True, help="Path to the config file"
+    )
+
+    args = parser.parse_args()
+    return args

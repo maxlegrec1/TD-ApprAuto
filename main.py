@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 
@@ -8,7 +9,9 @@ from trainer.train import calculate_scores, print_scores
 from utils.data import get_data
 
 if __name__ == "__main__":
-    config_path = "configs/config_one_model.json"
+    args = parse_args()
+    config_path = args.cfg
+    print(config_path)
     with open(config_path, "r") as f:
         json_obj = json.load(f)
     # create run dir
