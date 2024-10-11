@@ -16,6 +16,8 @@ class AverageModel(BaseEstimator, RegressorMixin):
             preds = np.mean([model.predict(X) for model in self.models], axis=0)
         elif self.mode == "median":
             preds = np.median([model.predict(X) for model in self.models], axis=0)
+        elif self.mode == "single":
+            preds = np.array([self.models[0].predict(X)])
         else:
             raise ValueError("Incorrect Mode entered")
         return preds
