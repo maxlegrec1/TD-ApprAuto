@@ -213,7 +213,7 @@ def get_data(
     n_pca: Optional[int] = None,
     one_hot_encode: bool = True,
     normalize: bool = False,
-    quality: Optional[Callable[[pd.Series], float]] = None,
+    use_quality: bool = False,
     plot_pca: bool = False,
 ) -> Union[
     Tuple[pd.DataFrame, pd.DataFrame],
@@ -262,7 +262,7 @@ def get_data(
         data, columns, errors="ignore" if one_hot_encode else "raise"
     )
     
-    if quality is not None:
+    if use_quality:
         data[target_features] = scale(data[target_features])
         data_quality = data[target_features].apply(quality, axis=1)
         data_quality.name = "Quality"

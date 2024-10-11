@@ -105,7 +105,9 @@ def calculate_scores(
 ):
     # makes predictions
     y_train_pred = model.predict(X_train)
+    y_train_pred = y_train_pred.reshape(y_train_pred.shape[0], y_train_pred.shape[1] if len(y_train_pred.shape) > 1 else 1)
     y_test_pred = model.predict(X_test)
+    y_test_pred = y_test_pred.reshape(y_test_pred.shape[0], y_test_pred.shape[1] if len(y_test_pred.shape) > 1 else 1)
 
     result_dir = {}
 

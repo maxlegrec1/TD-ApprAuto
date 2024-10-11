@@ -65,6 +65,10 @@ def parse_args():
     parser.add_argument(
         "--cfg", type=str, required=True, help="Path to the config file"
     )
+    
+    parser.add_argument(
+        "--output", type=str, help="Name of the output file"
+    )
 
     args = parser.parse_args()
     return args

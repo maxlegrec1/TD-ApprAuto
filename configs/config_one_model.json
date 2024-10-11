@@ -2,7 +2,7 @@
   "models": [
     {
       "name": "random_forest",
-      "n_estimators":100
+      "n_estimators": 100
     }
   ],
   "target_features": [["Yield strength", "Ultimate tensile strength"]],

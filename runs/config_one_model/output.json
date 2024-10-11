@@ -5,7 +5,7 @@
             "n_estimators": 100
         },
         "random_state": [
-            390
+            955
         ],
         "test_size": 0.2,
         "method": "supervised",
@@ -15,17 +15,17 @@
             "Ultimate tensile strength"
         ],
         "drop_y_nans": true,
-        "r2_score_train": 0.9718342642952371,
-        "r2_score_test": 0.8144348828058849,
-        "mse_train": 204.02703668359618,
-        "mse_test": 1669.9747482791552,
-        "r2_score_Yield strength_train": 0.9670555882835907,
-        "r2_score_Yield strength_test": 0.7978182613978376,
-        "r2_score_Ultimate tensile strength_train": 0.9766129403068836,
-        "r2_score_Ultimate tensile strength_test": 0.8310515042139324,
-        "mse_Yield strength_train": 239.6753510158313,
-        "mse_Yield strength_test": 1642.545392422151,
-        "mse_Ultimate tensile strength_train": 168.37872235136103,
-        "mse_Ultimate tensile strength_test": 1697.404104136159
+        "r2_score_train": 0.9753443946658183,
+        "r2_score_test": 0.7605278448319681,
+        "mse_train": 193.8306897233906,
+        "mse_test": 1632.1978150690807,
+        "r2_score_Yield strength_train": 0.9712151275393337,
+        "r2_score_Yield strength_test": 0.7241498926747968,
+        "r2_score_Ultimate tensile strength_train": 0.979473661792303,
+        "r2_score_Ultimate tensile strength_test": 0.7969057969891395,
+        "mse_Yield strength_train": 224.00313491538813,
+        "mse_Yield strength_test": 1761.5307409529369,
+        "mse_Ultimate tensile strength_train": 163.65824453139334,
+        "mse_Ultimate tensile strength_test": 1502.8648891852245
     }
 ]

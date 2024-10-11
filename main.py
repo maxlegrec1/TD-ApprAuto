@@ -11,6 +11,7 @@ from utils.data import get_data
 if __name__ == "__main__":
     args = parse_args()
     config_path = args.cfg
+    output_name = args.output if args.output else "output.json"
     print(config_path)
     with open(config_path, "r") as f:
         json_obj = json.load(f)
@@ -63,7 +64,7 @@ if __name__ == "__main__":
             final_results[key] = value / num_states
         instances[i].update(final_results)
     
-    with open(f"{run_dir}/output.json", "w") as f:
+    with open(f"{run_dir}/{output_name}", "w") as f:
         json.dump(instances, f, indent=4)
 
     exit()

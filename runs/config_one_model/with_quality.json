@@ -1,0 +1,27 @@
+[
+    {
+        "model": "random_forest",
+        "model_args": {
+            "n_estimators": 100
+        },
+        "random_state": [
+            776
+        ],
+        "test_size": 0.2,
+        "method": "supervised",
+        "method_args": {},
+        "target_features": [
+            "Yield strength",
+            "Ultimate tensile strength"
+        ],
+        "drop_y_nans": true,
+        "r2_score_train": 0.9761899576752747,
+        "r2_score_test": 0.8085425569509382,
+        "mse_train": 0.024107360537296188,
+        "mse_test": 0.19327255807406002,
+        "r2_score_Quality_train": 0.9761899576752747,
+        "r2_score_Quality_test": 0.8085425569509382,
+        "mse_Quality_train": 0.024107360537296188,
+        "mse_Quality_test": 0.19327255807406002
+    }
+]
