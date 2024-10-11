@@ -4,13 +4,18 @@ import torch.nn.functional as F
 
 
 class MLP(torch.nn.Module):
-    def __init__(self, X_shape, Y_shape, hidden_layer_size=300, p_dropout=0.0):
+    def __init__(self, hidden_layer_size=300, p_dropout=0.0):
         super().__init__()
+        self.num_features = None
+        self.num_labels = None
+        self.p_dropout = p_dropout
+        self.hidden_layer_size = hidden_layer_size
+
+    def late_init(self, X_shape, Y_shape):
         self.num_features = X_shape[-1]
         self.num_labels = Y_shape[-1]
-        self.p_dropout = p_dropout
-        self.hidden_layer = torch.nn.Linear(self.num_features, hidden_layer_size)
-        self.output_layer = torch.nn.Linear(hidden_layer_size, self.num_labels)
+        self.hidden_layer = torch.nn.Linear(self.num_features, self.hidden_layer_size)
+        self.output_layer = torch.nn.Linear(self.hidden_layer_size, self.num_labels)
 
     def forward(self, src):
         X = F.relu(self.hidden_layer(src))
@@ -26,6 +31,8 @@ class MLP(torch.nn.Module):
     def fit(self, X, Y, learning_rate=1e-3, batch_size=16, epochs=1000):
         X = torch.tensor(X.values.astype(float), dtype=torch.float32)
         Y = torch.tensor(Y.values.astype(float), dtype=torch.float32)
+
+        self.late_init(X.shape, Y.shape)
         opt = torch.optim.Adam(self.parameters(), lr=learning_rate)
         criterion = torch.nn.MSELoss()
 
@@ -53,9 +60,3 @@ class MLP(torch.nn.Module):
 
                 # Accumulate the batch loss
                 epoch_loss += loss.item()
-            # avg_loss = epoch_loss / len(dataloader)
-            # print(f"Epoch [{epoch+1}/{epochs}], Loss: {avg_loss:.4f}")
-
-
-# model = MLP([41], [2])
-# print(sum(p.numel() for p in model.parameters()))

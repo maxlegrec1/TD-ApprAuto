@@ -1,0 +1,14 @@
+{
+  "models": [
+    {
+      "name": "random_forest",
+      "n_estimators":100
+    }
+  ],
+  "target_features": [["Yield strength", "Ultimate tensile strength"]],
+  "random_states": 1,
+  "test_size": [0.2],
+  "methods": [
+    {"name":"supervised"}
+]
+}

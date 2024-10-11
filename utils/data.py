@@ -1,11 +1,11 @@
 from typing import Generator, List, Literal, Optional, Tuple, Union, Callable
 
-from sklearn.preprocessing import StandardScaler
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold, train_test_split
+from sklearn.preprocessing import StandardScaler
 
-from pca import pca
+from utils.pca import pca
 
 COLUMNS = [
     "Carbon concentration",
@@ -151,7 +151,6 @@ FEATURES = [
     "Type of weld",
     "Post weld heat treatment temperature",
     "Post weld heat treatment time",
-    # "Charpy temperature"
 ]
 
 IMPURITIES = [
@@ -186,12 +185,29 @@ ELECTRODE_TYPE = ["+", "-"]
 AC_DC = ["AC", "DC"]
 
 
+def quality(row: pd.Series) -> float:
+    if row.isna().all():
+        return np.nan
+    
+    inv_materials = set(["Martensite", "Ferrite with carbide aggregate", r"50 % FATT"])
+    s = 0.0
+    n = 0
+    for material in row.index:
+        if not np.isnan(row[material]):
+            s += (-1.0 if row[material] in inv_materials else 1.0) * row[material]
+            n += 1
+    
+    return s / n
+
+
 def get_data(
     target_features: Union[str, List[str]] = TARGET_FEATURES,
     features: List[str] = FEATURES,
     filename: str = "welddb/welddb.data",
     drop_y_nan_values: bool = True,
-    nan_values: Optional[Literal["Gaussian", "Mean", "Median", "Zero", "Remove"]] = None,
+    nan_values: Optional[
+        Literal["Gaussian", "Mean", "Median", "Zero", "Remove"]
+    ] = None,
     test_size: Optional[float] = None,
     random_state: int = 42,
     n_pca: Optional[int] = None,
@@ -229,7 +245,7 @@ def get_data(
     assert columns.issubset(
         COLUMNS
     ), f"These columns are not in the data: {', '.join([col for col in columns if col not in COLUMNS])}"
-    
+
     assert normalize or n_pca is None, "PCA can only be used with normalization"
 
     columns = list(columns)
@@ -245,7 +261,7 @@ def get_data(
     data = convert_to_float(
         data, columns, errors="ignore" if one_hot_encode else "raise"
     )
-
+    
     if quality is not None:
         data[target_features] = scale(data[target_features])
         data_quality = data[target_features].apply(quality, axis=1)
@@ -254,29 +270,34 @@ def get_data(
         data = pd.concat([data, data_quality], axis=1)
         target_features = [data_quality.name]
 
-    if drop_y_nan_values:
-        data.dropna(subset=target_features, inplace=True)
-
     X = data.drop(target_features, axis=1)  # Features
     y = data[target_features]  # Target
 
     if test_size is None:
         X = replace_nan(X, method=nan_values)
         y = replace_nan(y, method=nan_values)
-        
+
         if normalize:
             X = scale(X)
             X = pca(X, n_components=n_pca, plot=plot_pca)
-        
+
         return X, y
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=test_size, random_state=random_state
     )
-    
+
+    if drop_y_nan_values:
+        valid_train = ~y_train.isna().any(axis=1)
+        X_train = X_train[valid_train]
+        y_train = y_train[valid_train]
+
+        valid_test = ~y_test.isna().any(axis=1)
+        X_test = X_test[valid_test]
+        y_test = y_test[valid_test]
+
     X_train, X_test = replace_nan(X_train, X_test, method=nan_values)
-    y_train, y_test = replace_nan(y_train, y_test, method=nan_values)
-    
+
     if normalize:
         X_train, X_test = scale(X_train, X_test)
         X_train, X_test = pca(X_train, X_test, n_components=n_pca, plot=plot_pca)
@@ -335,12 +356,14 @@ def scale(
     data_test: Optional[pd.DataFrame] = None,
 ) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
     """Normalizes the data using the StandardScaler."""
-    
+
     scaler = StandardScaler()
-    data_train = pd.DataFrame(scaler.fit_transform(data_train), columns=data_train.columns)
+    data_train = pd.DataFrame(
+        scaler.fit_transform(data_train), columns=data_train.columns
+    )
     if data_test is None:
         return data_train
-    
+
     data_test = pd.DataFrame(scaler.transform(data_test), columns=data_test.columns)
     return data_train, data_test
 
@@ -354,7 +377,7 @@ def replace_nan(
 ) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
     """The mean and std are calculated only with the training data."""
     if method is None:
-        return data_train if data_test is None else (data_train, data_test)
+        return data_train if data_test is None else data_train, data_test
 
     if method == "Remove":
         data_train = data_train.dropna()
@@ -452,9 +475,8 @@ def remove_anomalies(data: pd.DataFrame) -> pd.DataFrame:
         data["Hardness"].replace(
             r"(\d+)\(?Hv\d+\)?", r"\1", regex=True, inplace=True
         )  # Replace 99(Hv30) by 99
-    
-    # data.drop(data[data["Type of weld"] != "MMA"].index, inplace=True)
-    
+    if "Type of weld" in data.columns:
+        data["Type of weld"].replace("ShMA", "MMA", inplace=True)
     return data
 
 
@@ -476,6 +498,14 @@ def convert_to_float(
 
 if __name__ == "__main__":
     print("Testing data.py...")
-    X, y = get_data("Yield strength", set(FEATURES) - set(COLUMNS_STRING), n_pca=2, normalize=True, drop_y_nan_values=True, nan_values="Custom1", plot_pca=True)
-    
+    X, y = get_data(
+        "Yield strength",
+        set(FEATURES) - set(COLUMNS_STRING),
+        n_pca=2,
+        normalize=True,
+        drop_y_nan_values=True,
+        nan_values="Custom1",
+        plot_pca=True
+    )
     print(X)
+    print(y)
