@@ -10,5 +10,5 @@
   "test_size": [0.2],
   "methods": [
     {"name":"supervised"}
-]
+  ]
 }

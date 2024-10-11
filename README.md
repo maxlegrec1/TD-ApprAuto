@@ -1,6 +1,16 @@
 # Requirements
 ```pip install pandas numpy torch sklearn```
 
+
+# How to use :
+
+## To train a model :
+`python3 main.py --cfg configs/<config_name>.json`
+
+## To visualize a model :
+`python3 visualize.py --cfg runs/<config_name>/output.json`
+
+
 # Columns :
 | Name                                 | Type    | Not N | Valid | To convert | Comment                                                |
 |--------------------------------------|---------|-------|-------|------------|--------------------------------------------------------|
@@ -92,8 +102,3 @@
 | Acicular ferrite                           | 52.8333       | 23.4838       | 60            | 0             | 88            |              
 | Martensite                                 | 0.337079      | 3.17999       | 0             | 0             | 30            |              
 | Ferrite with carbide aggregate             | 0.438202      | 1.39769       | 0             | 0             | 8             |    
-
-# How to run ? :
-Go to the the file corresponding to the model you want to run, among linear_regression, nn, random_forest (best results atm)
-Set the parameters of `train()` and `get_data()`
-execute the file.
