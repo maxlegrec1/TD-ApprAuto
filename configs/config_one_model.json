@@ -5,10 +5,11 @@
       "n_estimators": 100
     }
   ],
-  "target_features": [["Yield strength", "Ultimate tensile strength"]],
-  "random_states": 1,
-  "test_size": [0.2],
-  "methods": [
-    {"name":"supervised"}
-  ]
+  "methods": [{"name":"supervised"}],
+  "data_args": {
+    "target_features": [["Yield strength", "Ultimate tensile strength"]],
+    "nan_values": ["Median", "Custom1"],
+    "random_state": 1,
+    "test_size": 0.2
+  }
 }

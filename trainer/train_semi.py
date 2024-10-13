@@ -31,7 +31,6 @@ def train_semi(
         RandomForestQuantileRegressor,
         X_train_supervised,
         y_train_supervised,
-        **model_params,
     )
     X_train = X_train[model_supervised.models[0].feature_names_in_]
 

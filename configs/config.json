@@ -6,16 +6,18 @@
     },
     {
       "name": "linear_regression",
-      "fit_intercept": true,
-      "normalize": false
+      "fit_intercept": true
     },
     {"name":"neural_network"}
   ],
-  "target_features": [["Yield strength", "Ultimate tensile strength"]],
-  "random_states": 50,
-  "test_size": [0.1,0.2,0.3],
+  "data_args": {
+    "target_features": [["Yield strength", "Ultimate tensile strength"]],
+    "random_state": 2,
+    "test_size": [0.1, 0.2, 0.3],
+    "nan_values": "Custom1"
+  },
   "methods": [
     {"name": "semi_supervised", "threshold": 60},
-    {"name":"supervised"}
+    {"name": "supervised"}
   ]
 }

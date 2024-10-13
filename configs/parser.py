@@ -21,30 +21,31 @@ method_dict = {"supervised": train, "semi_supervised": train_semi}
 def parse_json_and_create_tests(json_data):
     # Parse the models and test_size directly
     models = json_data["models"]
-    test_size = json_data["test_size"]
     methods = json_data["methods"]
-    target_features = json_data["target_features"]
     # Handle random_state: if it's a list, use it directly, otherwise generate random integers
-    random_states = json_data["random_states"]
-    if isinstance(random_states, int):
-        random_states = [
-            random.sample(range(1000), random_states)
-        ]  # Generate random numbers
+    if isinstance(json_data["data_args"]["random_state"], int):
+        json_data["data_args"]["random_state"] = \
+            random.sample(range(1000), json_data["data_args"]["random_state"]) # Generate random numbers
+    
+    # Transform all data_args into lists
+    for data_arg, data_arg_value in json_data["data_args"].items():
+        if not isinstance(data_arg_value, list):
+            json_data["data_args"][data_arg] = [data_arg_value]
 
-    # Generate all combinations of models, random_state, and test_size
+    # Generate all combinations of models, data_args, train_args
     test_instances = []
-    for model, states, size, method, target_feature in itertools.product(
-        models, random_states, test_size, methods, target_features
+    for model, method, *args in itertools.product(
+        models, methods, *json_data["data_args"].values()
     ):
         instance = {
             "model": model["name"],
             "model_args": {k: v for k, v in model.items() if k != "name"},
-            "random_state": states,
-            "test_size": size,
             "method": method["name"],
             "method_args": {k: v for k, v in method.items() if k != "name"},
-            "target_features": target_feature,
-            "drop_y_nans": not "semi" in method["name"],
+            "data_args": {**{
+                key: value
+                for key, value in zip(json_data["data_args"].keys(), args)
+            }, "drop_y_nans": not "semi" in method["name"]},
         }
         test_instances.append(instance)
 

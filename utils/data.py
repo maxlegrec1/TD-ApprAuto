@@ -204,9 +204,9 @@ def get_data(
     target_features: Union[str, List[str]] = TARGET_FEATURES,
     features: List[str] = FEATURES,
     filename: str = "welddb/welddb.data",
-    drop_y_nan_values: bool = True,
+    drop_y_nans: bool = True,
     nan_values: Optional[
-        Literal["Gaussian", "Mean", "Median", "Zero", "Remove"]
+        Literal["Gaussian", "Mean", "Median", "Zero", "Remove", "Custom1"]
     ] = None,
     test_size: Optional[float] = None,
     random_state: int = 42,
@@ -287,7 +287,7 @@ def get_data(
         X, y, test_size=test_size, random_state=random_state
     )
 
-    if drop_y_nan_values:
+    if drop_y_nans:
         valid_train = ~y_train.isna().any(axis=1)
         X_train = X_train[valid_train]
         y_train = y_train[valid_train]
@@ -371,8 +371,8 @@ def scale(
 def replace_nan(
     data_train: pd.DataFrame,
     data_test: Optional[pd.DataFrame] = None,
-    method: Literal[
-        "Gaussian", "Mean", "Median", "Zero", "Remove", "Custom1", None
+    method: Optional[
+        Literal["Gaussian", "Mean", "Median", "Zero", "Remove", "Custom1"]
     ] = None,
 ) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
     """The mean and std are calculated only with the training data."""
