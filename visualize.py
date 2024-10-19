@@ -29,6 +29,7 @@ if __name__ == "__main__":
         ("R2 Score Ultimate Tensile Strength", "r2_score_Ultimate tensile strength"),
         ("MSE Yield Strength", "mse_Yield strength"),
         ("MSE Ultimate Tensile Strength", "mse_Ultimate tensile strength"),
+        ("MSE Quality", "mse_Quality"),
     ]
 
     # Create a 3x2 subplot figure
@@ -47,17 +48,20 @@ if __name__ == "__main__":
         col = i % 2 + 1
 
         for j, model in enumerate(data):
+            if f"{metric_key}_train" not in model:
+                continue
+            
             model_name = model["model"]
             color = colors[model_name]
 
             hover_text = f"""
     Model: {model_name}
-    Model args: {json.dumps(model.get('model_args', {}), indent=2)}
+    Model args: {json.dumps(model.get('model_args', {}), indent=8)}
     Test size: {model.get('test_size', 'N/A')}
     Method: {model.get('method', 'N/A')}
-    Method args: {json.dumps(model.get('method_args', {}), indent=2)}
-    Target features: {json.dumps(model.get('target_features', []), indent=2)}
-            """.strip()
+    Method args: {json.dumps(model.get('method_args', {}), indent=8)}
+    Data args: {json.dumps(model.get('data_args', {}), indent=8)}
+            """.strip().replace("\n", "<br>")
 
             # Train score
             fig.add_trace(

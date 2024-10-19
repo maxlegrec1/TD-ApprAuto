@@ -185,7 +185,7 @@ ELECTRODE_TYPE = ["+", "-"]
 AC_DC = ["AC", "DC"]
 
 
-def quality(row: pd.Series) -> float:
+def quality(row: pd.Series) -> pd.Series:
     if row.isna().all():
         return np.nan
     
@@ -197,7 +197,7 @@ def quality(row: pd.Series) -> float:
             s += (-1.0 if row[material] in inv_materials else 1.0) * row[material]
             n += 1
     
-    return s / n
+    return pd.Series(s / n, index=["Quality"])
 
 
 def get_data(
@@ -265,13 +265,17 @@ def get_data(
     if use_quality:
         data[target_features] = scale(data[target_features])
         data_quality = data[target_features].apply(quality, axis=1)
-        data_quality.name = "Quality"
         data = data.drop(target_features, axis=1)
         data = pd.concat([data, data_quality], axis=1)
-        target_features = [data_quality.name]
+        target_features = data_quality.columns
 
     X = data.drop(target_features, axis=1)  # Features
     y = data[target_features]  # Target
+
+    if drop_y_nans:
+        valid = ~y.isna().any(axis=1)
+        X = X[valid]
+        y = y[valid]
 
     if test_size is None:
         X = replace_nan(X, method=nan_values)
@@ -286,15 +290,6 @@ def get_data(
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=test_size, random_state=random_state
     )
-
-    if drop_y_nans:
-        valid_train = ~y_train.isna().any(axis=1)
-        X_train = X_train[valid_train]
-        y_train = y_train[valid_train]
-
-        valid_test = ~y_test.isna().any(axis=1)
-        X_test = X_test[valid_test]
-        y_test = y_test[valid_test]
 
     X_train, X_test = replace_nan(X_train, X_test, method=nan_values)
 

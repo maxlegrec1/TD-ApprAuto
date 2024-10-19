@@ -38,7 +38,7 @@ def train_semi(
 
     predictions = model_supervised.models[0].predict(
         X_train, quantiles=[0.025, 0.5, 0.975]
-    )
+    ).reshape(-1, y_train.shape[1], 3)
 
     y_interval = predictions[:, :, 2] - predictions[:, :, 0]
     mean = predictions[:, :, 0].mean(axis=0)

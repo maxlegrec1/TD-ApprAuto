@@ -8,9 +8,13 @@
       "name": "linear_regression"
     }
   ],
-  "target_features": [["Yield strength", "Ultimate tensile strength"]],
-  "random_states": 30,
-  "test_size": [0.1, 0.2, 0.3],
+  "data_args": {
+    "target_features": [["Yield strength", "Ultimate tensile strength"]],
+    "random_state": 3,
+    "test_size": [0.1, 0.2, 0.3],
+    "use_quality": [true, false],
+    "nan_values": "Custom1"
+  },
   "methods": [
     {"name": "supervised"},
     {
