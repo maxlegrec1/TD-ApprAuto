@@ -282,8 +282,13 @@ def get_data(
         y = replace_nan(y, method=nan_values)
 
         if normalize:
-            X = scale(X)
-            X = pca(X, n_components=n_pca, plot=plot_pca)
+            X_not_one_hot = X.drop(WELD_TYPE + ELECTRODE_TYPE + AC_DC, axis=1, errors="ignore")
+            X_one_hot = X.drop(X_not_one_hot.columns, axis=1)
+            
+            X_not_one_hot = scale(X_not_one_hot)
+            X_not_one_hot = pca(X_not_one_hot, n_components=n_pca, plot=plot_pca)
+            
+            X = pd.concat([X_not_one_hot, X_one_hot], axis=1)
 
         return X, y
 
@@ -294,8 +299,16 @@ def get_data(
     X_train, X_test = replace_nan(X_train, X_test, method=nan_values)
 
     if normalize:
-        X_train, X_test = scale(X_train, X_test)
-        X_train, X_test = pca(X_train, X_test, n_components=n_pca, plot=plot_pca)
+        X_train_not_one_hot = X_train.drop(WELD_TYPE + ELECTRODE_TYPE + AC_DC, axis=1, errors="ignore")
+        X_test_not_one_hot = X_test.drop(WELD_TYPE + ELECTRODE_TYPE + AC_DC, axis=1, errors="ignore")
+        X_train_one_hot = X_train.drop(X_train_not_one_hot.columns, axis=1)
+        X_test_one_hot = X_test.drop(X_test_not_one_hot.columns, axis=1)
+        
+        X_train_not_one_hot, X_test_not_one_hot = scale(X_train_not_one_hot, X_test_not_one_hot)
+        X_train_not_one_hot, X_test_not_one_hot = pca(X_train_not_one_hot, X_test_not_one_hot, n_components=n_pca, plot=plot_pca)
+        
+        X_train = pd.concat([X_train_not_one_hot, X_train_one_hot], axis=1)
+        X_test = pd.concat([X_test_not_one_hot, X_test_one_hot], axis=1)
 
     return X_train, X_test, y_train, y_test
 
