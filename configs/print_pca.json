@@ -1,0 +1,19 @@
+{
+    "models": [
+        {
+            "name": "linear_regression"
+        }
+    ],
+    "data_args": {
+        "random_state": 1,
+        "test_size": 0,
+        "nan_values": "Custom1",
+        "n_pca": 2,
+        "plot_pca": true,
+        "normalize": true,
+        "target_features": [["Yield strength", "Ultimate tensile strength"]]
+    },
+    "methods": [
+        {"name": "supervised"}
+    ]
+}

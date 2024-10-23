@@ -22,9 +22,13 @@ def pca(
     
     if plot:
         plt.figure(figsize=(8, 6))
-        plt.scatter(X_train_pca.iloc[:, 0], X_train_pca.iloc[:, 1], alpha=0.5)
-        for pc in pca.components_:
-            plt.arrow(0, 0, 10.0*pc[0], 10.0*pc[1], color='r', alpha=0.5, width=0.02, head_width=0.2, label='Principal Axes')
+        plt.scatter(X_train_pca.iloc[:, 0], X_train_pca.iloc[:, 1], alpha=0.25)
+        for ax in range(X_train.shape[1]):
+            important_names = {"Molybdenum concentration", "Manganese concentration", "Chromium concentration"}
+            name: str = X_train.columns[ax]
+            arrow_color = '#00ff00' if name in important_names else 'red'
+            plt.arrow(0, 0, 10*pca.components_[0, ax], 10*pca.components_[1, ax], head_width=0.1, head_length=0.1, fc=arrow_color, ec=arrow_color)
+            plt.text(10*pca.components_[0, ax], 10*pca.components_[1, ax], name, color='black', ha='right', fontsize=6)
         plt.xlabel('Principal Component 1')
         plt.ylabel('Principal Component 2')
         plt.title('PCA of Training Data')

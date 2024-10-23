@@ -277,7 +277,7 @@ def get_data(
         X = X[valid]
         y = y[valid]
 
-    if test_size is None:
+    if test_size is None or test_size == 0:
         X = replace_nan(X, method=nan_values)
         y = replace_nan(y, method=nan_values)
 
