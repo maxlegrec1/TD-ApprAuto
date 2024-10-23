@@ -1,0 +1,19 @@
+{
+    "models": [
+        {
+            "name": "random_forest",
+            "n_estimators": 100
+        }
+    ],
+    "data_args": {
+        "target_features": [["Yield strength", "Ultimate tensile strength"]],
+        "random_state": 1,
+        "test_size": 0.2,
+        "nan_values": "Custom1",
+        "normalize": true,
+        "n_pca": [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 0]
+    },
+    "methods": [
+        {"name": "supervised"}
+    ]
+  }

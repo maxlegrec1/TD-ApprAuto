@@ -11,14 +11,14 @@ def pca(
     n_components: Optional[int] = 10,
     plot: bool = False,
 ) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
-    if n_components is None:
+    if n_components is None or n_components <= 0:
         if X_test is None:
             return X_train
         return X_train, X_test
 
     pca = PCA(n_components=n_components)
 
-    X_train_pca = pd.DataFrame(pca.fit_transform(X_train))
+    X_train_pca = pd.DataFrame(pca.fit_transform(X_train), index=X_train.index, columns=[f'PCA_{i+1}' for i in range(n_components)])
     
     if plot:
         plt.figure(figsize=(8, 6))
@@ -38,5 +38,5 @@ def pca(
     if X_test is None:
         return X_train_pca
 
-    X_test_pca = pd.DataFrame(pca.transform(X_test))
+    X_test_pca = pd.DataFrame(pca.transform(X_test), index=X_test.index, columns=[f'PCA_{i+1}' for i in range(n_components)])
     return X_train_pca, X_test_pca

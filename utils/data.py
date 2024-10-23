@@ -367,12 +367,12 @@ def scale(
 
     scaler = StandardScaler()
     data_train = pd.DataFrame(
-        scaler.fit_transform(data_train), columns=data_train.columns
+        scaler.fit_transform(data_train), columns=data_train.columns, index=data_train.index
     )
     if data_test is None:
         return data_train
 
-    data_test = pd.DataFrame(scaler.transform(data_test), columns=data_test.columns)
+    data_test = pd.DataFrame(scaler.transform(data_test), columns=data_test.columns, index=data_test.index)
     return data_train, data_test
 
 
