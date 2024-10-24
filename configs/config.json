@@ -8,16 +8,28 @@
       "name": "linear_regression",
       "fit_intercept": true
     },
-    {"name":"neural_network"}
+    {
+      "name": "neural_network"
+    }
   ],
   "data_args": {
-    "target_features": [["Yield strength", "Ultimate tensile strength"]],
+    "target_features": [["Yield strength",
+    "Ultimate tensile strength",
+    "Elongation",
+    "Reduction of Area",
+    "Hardness",
+    "50 % FATT",
+    "Primary ferrite in microstructure",
+    "Ferrite with second phase",
+    "Acicular ferrite",
+    "Martensite",
+    "Ferrite with carbide aggreagate"]],
     "random_state": 2,
-    "test_size": [0.1, 0.2, 0.3],
-    "nan_values": "Custom1"
+    "test_size": 0.2,
+    "nan_values": "Custom1",
+    "use_quality": true
   },
   "methods": [
-    {"name": "semi_supervised", "threshold": 60},
     {"name": "supervised"}
   ]
 }
