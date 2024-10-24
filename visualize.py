@@ -30,10 +30,11 @@ if __name__ == "__main__":
         ("MSE Yield Strength", "mse_Yield strength"),
         ("MSE Ultimate Tensile Strength", "mse_Ultimate tensile strength"),
         ("MSE Quality", "mse_Quality"),
+        ("R2 Score Quality", "r2_score_Quality"),
     ]
 
     # Create a 3x2 subplot figure
-    fig = make_subplots(rows=3, cols=2, subplot_titles=[m[0] for m in metrics])
+    fig = make_subplots(rows=4, cols=2, subplot_titles=[m[0] for m in metrics])
 
     # Generate colors for each unique model
     unique_models = list(set(model["model"] for model in data))
@@ -62,6 +63,8 @@ if __name__ == "__main__":
     Method args: {json.dumps(model.get('method_args', {}), indent=8)}
     Data args: {json.dumps(model.get('data_args', {}), indent=8)}
             """.strip().replace("\n", "<br>")
+
+            print(j, model[f"{metric_key}_train"], metric_name, metric_key)
 
             # Train score
             fig.add_trace(
